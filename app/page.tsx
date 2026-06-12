@@ -121,7 +121,7 @@ export default async function HomePage() {
           </div>
 
           {/* ── Desktop headline (≥ lg) ── */}
-          <div className="hidden lg:block pt-16 pb-8">
+          <div className="hidden lg:block pt-16 pb-12">
             <span className="inline-flex rounded-full border border-amber-400/50 bg-amber-400/10 px-4 py-1 text-sm font-medium text-amber-200">
               Heavy transport marketplace for Saudi Arabia
             </span>
@@ -193,13 +193,13 @@ export default async function HomePage() {
           </div>
 
           {/* ── Desktop search form (≥ lg) ── */}
-          <div className="hidden lg:block pb-12">
-            <div className="w-[600px] rounded-2xl bg-white p-5 shadow-2xl">
+          <div className="hidden lg:block pt-4">
+            <div className="w-[600px] rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl">
               {/* Row 1: From | To | Cargo Type */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">From</label>
-                  <div className="flex h-[42px] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3">
+                  <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
                     <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
                     <input
                       name="origin"
@@ -210,7 +210,7 @@ export default async function HomePage() {
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">To</label>
-                  <div className="flex h-[42px] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3">
+                  <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
                     <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
                     <input
                       name="destination"
@@ -224,7 +224,7 @@ export default async function HomePage() {
                   <select
                     name="cargo_type"
                     defaultValue=""
-                    className="h-[42px] rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none"
+                    className="flex h-[42px] text-slate-400 items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3"
                   >
                     <option value="">All Types</option>
                     <option value="heavy_equipment">Heavy Equipment</option>
@@ -240,7 +240,7 @@ export default async function HomePage() {
                   <select
                     name="vehicle_type"
                     defaultValue=""
-                    className="h-[42px] rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none"
+                    className="flex h-[42px] text-slate-400 items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3"
                   >
                     <option value="">All Vehicles</option>
                     <option value="lowbed_trailer">Lowbed Trailer</option>
@@ -253,7 +253,7 @@ export default async function HomePage() {
                   <select
                     name="weight"
                     defaultValue=""
-                    className="h-[42px] rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none"
+                    className="flex h-[42px] text-slate-400 items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3"
                   >
                     <option value="">Any Weight</option>
                     <option value="0-10000">Up to 10,000 kg</option>
