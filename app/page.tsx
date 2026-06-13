@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Users,
 } from "lucide-react";
-import WishListButton from "./components/WishListButton";
+import JobCard from "./components/JobCard";
+import FeaturedJobsCarousel from "./components/FeaturedJobsCarousel";
 
 function formatValue(value: string | null | undefined) {
   if (!value) return "Not specified";
@@ -191,6 +192,19 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+          <div className="flex items-center justify-center gap-24 py-7 lg:hidden">
+  <MobileStat
+    icon={<Briefcase />}
+    value={`${activeJobsCount || 0}+`}
+    label="Jobs"
+  />
+
+  <MobileStat
+    icon={<MapPin />}
+    value={`${citiesCoveredCount}+`}
+    label="Cities"
+  />
+</div>
 
           {/* ── Desktop search form (≥ lg) ── */}
           <div className="hidden lg:block pt-4">
@@ -273,89 +287,31 @@ export default async function HomePage() {
                 </div>
               </div>
             </form>
-          </div>
+            <div className="mt-6 mb-3 flex w-[600px] items-center justify-start gap-8">
+  <DesktopStat
+    icon={<Briefcase className="h-8 w-8" />}
+    value={`${activeJobsCount || 0}+`}
+    label="Active Jobs"
+  />
 
-        </div>
-
-        {/* ── Stats bar ── */}
-        <div>
-          <div className="mx-auto max-w-7xl px-5 lg:px-10">
-            {/* Mobile: 2x2 centered vertical */}
-<div className="flex items-center justify-center gap-24 py-7 lg:hidden">
-<MobileStat
-  icon={<Briefcase />}
-  value={`${activeJobsCount || 0}+`}
-  label="Jobs"
-/>
-
-<MobileStat
-  icon={<MapPin />}
-  value={`${citiesCoveredCount}+`}
-  label="Cities"
-/>
+  <DesktopStat
+    icon={<MapPin className="h-8 w-8" />}
+    value={`${citiesCoveredCount}+`}
+    label="Cities Covered"
+  />
 </div>
-            {/* Desktop: horizontal row */}
-            <div className="hidden lg:flex lg:divide-x lg:divide-white/10">
-              <DesktopStat icon={<Briefcase className="h-5 w-5" />} value={`${activeJobsCount || 0}+`} label="Active Jobs" />
-              <DesktopStat icon={<MapPin className="h-5 w-5" />} value={`${citiesCoveredCount}+`} label="Cities Covered" />
-            </div>
           </div>
+
         </div>
+
+
+ 
       </section>
 
       {/* ═══════════ JOBS ═══════════ */}
-      <section className="mx-auto max-w-7xl px-5 py-8 lg:px-10 lg:py-12">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900 lg:text-2xl">
-            <span className="lg:hidden">Latest transport jobs</span>
-            <span className="hidden lg:inline">Browse Open Transport Jobs</span>
-          </h2>
-          <Link href="/jobs" className="flex items-center gap-0.5 text-sm font-semibold text-slate-500 hover:text-slate-900 lg:text-blue-600">
-            View all <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
+<FeaturedJobsCarousel />
 
-        {jobs && jobs.length > 0 ? (
-          <>
-            {/* Mobile list */}
-            <div className="space-y-3 lg:hidden">
-              {jobs.map((job) => <MobileJobCard key={job.id} job={job} />)}
-            </div>
-            {/* Desktop grid */}
-            <div className="hidden lg:grid lg:grid-cols-4 gap-4">
-              {jobs.map((job) => <DesktopJobCard key={job.id} job={job} />)}
-            </div>
-          </>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <h3 className="text-lg font-semibold text-slate-900">No jobs posted yet</h3>
-            <p className="mt-2 text-sm text-slate-500">Be the first to post a heavy transport request.</p>
-            <Link href="/create-listing" className="mt-5 inline-flex rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-300">
-              Post a Job
-            </Link>
-          </div>
-        )}
-      </section>
 
-      {/* ═══════════ TRUST FEATURES ═══════════ */}
-      <section className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-8 lg:px-10 lg:py-12">
-          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-8">
-            <TrustFeature icon={<ShieldCheck className="h-6 w-6" />} title="Verified Transporters" description="All transport providers are verified and trusted." />
-            <TrustFeature icon={<Zap className="h-6 w-6" />} title="Fast & Easy" description="Post or find a job in minutes and get matched quickly." />
-            <TrustFeature
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
-              title="Secure & Reliable"
-              description="Safe transactions and reliable communication."
-            />
-            <TrustFeature
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 18v-6a9 9 0 0118 0v6"/><path strokeLinecap="round" strokeLinejoin="round" d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>}
-              title="Local Support"
-              description="Dedicated support team across Saudi Arabia."
-            />
-          </div>
-        </div>
-      </section>
 
       {/* ═══════════ CTA BANNER (desktop only) ═══════════ */}
       <section className="hidden bg-[#07152b] lg:block">
@@ -369,10 +325,6 @@ export default async function HomePage() {
               <Link href="/create-listing" className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-300 transition-colors">
                 Post a Job
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
-              </Link>
-              <Link href="/register" className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/10 transition-colors">
-                Create Carrier Profile
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
               </Link>
             </div>
           </div>
@@ -411,69 +363,33 @@ function MobileStat({
   );
 }
 
-function DesktopStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+function DesktopStat({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
   return (
-    <div className="flex items-center gap-3 px-8 py-5 first:pl-0 last:pr-0">
-      <span className="text-amber-400">{icon}</span>
+    <div className="flex items-center gap-4">
+      <span className="text-amber-400 [&>svg]:h-7 [&>svg]:w-7">
+        {icon}
+      </span>
+
       <div>
-        <div className="text-xl font-bold text-white">{value}</div>
-        <div className="text-xs text-slate-400">{label}</div>
+        <div className="text-2xl font-bold leading-none text-white">
+          {value}
+        </div>
+        <div className="mt-1 text-sm font-medium text-slate-400">
+          {label}
+        </div>
       </div>
     </div>
   );
 }
 
-function MobileJobCard({ job }: { job: any }) {
-  const tag = (job.urgency || "new").toLowerCase();
-  const { label, className } = urgencyConfig[tag] ?? urgencyConfig.normal;
-  return (
-    <Link href={`/jobs/${job.id}`} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${className}`}>{label}</span>
-        <span className="text-sm font-bold text-emerald-600">
-          {job.budget_sar ? `SAR ${Number(job.budget_sar).toLocaleString()}` : "Open"}
-        </span>
-      </div>
-      <div>
-        <h3 className="text-base font-bold text-slate-900 line-clamp-1">{job.title}</h3>
-        <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
-          {job.origin_city} → {job.destination_city}
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-        <span className="flex items-center gap-1"><Package className="h-3.5 w-3.5" />{job.weight_kg ? `${Number(job.weight_kg).toLocaleString()} kg` : "—"}</span>
-        <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5" />{formatValue(job.vehicle_type)}</span>
-        <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{job.pickup_date || "—"}</span>
-      </div>
-    </Link>
-  );
-}
-
-function DesktopJobCard({ job }: { job: any }) {
-  const tag = (job.urgency || "new").toLowerCase();
-  const { label, className } = urgencyConfig[tag] ?? urgencyConfig.normal;
-  return (
-    <Link href={`/jobs/${job.id}`} className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <WishListButton />
-      <span className={`w-fit rounded-full px-2.5 py-0.5 text-[11px] font-bold ${className}`}>{label}</span>
-      <h3 className="mt-3 text-base font-bold text-slate-900">{job.origin_city} → {job.destination_city}</h3>
-      <div className="mt-1 space-y-0.5 text-xs text-slate-500">
-        <p className="line-clamp-1">{job.origin_detail || job.origin_city}</p>
-        <p className="line-clamp-1">{job.destination_detail || job.destination_city}</p>
-      </div>
-      <div className="mt-3 grow space-y-1.5 text-sm text-slate-600">
-        <div className="flex items-center gap-2"><Package className="h-4 w-4 shrink-0 text-slate-400" />{job.weight_kg ? `${Number(job.weight_kg).toLocaleString()} kg` : "—"}</div>
-        <div className="flex items-center gap-2"><Truck className="h-4 w-4 shrink-0 text-slate-400" />{formatValue(job.vehicle_type)}</div>
-        <div className="flex items-center gap-2"><Calendar className="h-4 w-4 shrink-0 text-slate-400" />{job.pickup_date || "—"}</div>
-      </div>
-      <div className="mt-4 flex items-center justify-between">
-        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold capitalize text-blue-700">{formatValue(job.cargo_type)}</span>
-        <span className="text-sm font-bold text-emerald-600">{job.budget_sar ? `SAR ${Number(job.budget_sar).toLocaleString()}` : "Open"}</span>
-      </div>
-    </Link>
-  );
-}
 
 function TrustFeature({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (

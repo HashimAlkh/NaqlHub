@@ -15,10 +15,11 @@ export default function SuccessPage() {
           Transport Job Submitted
         </h1>
 
-        <p className="mt-4 max-w-xl text-lg text-slate-600">
-          Your transport request has been successfully submitted and is now
-          available on NaqlHub.
-        </p>
+       <p className="mt-4 max-w-xl text-lg text-slate-600">
+  Your transport request has been successfully published on NaqlHub.
+
+Carriers can now view your job and contact you directly via WhatsApp.
+</p>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
           <Link

@@ -47,7 +47,7 @@ export async function createTransportJob(formData: FormData) {
     description: requiredString(formData, "description"),
     contact_name: requiredString(formData, "contact_name"),
     whatsapp_number: requiredString(formData, "whatsapp_number"),
-    status: "pending",
+    status: "approved",
   };
 
   const { data, error } = await supabase
