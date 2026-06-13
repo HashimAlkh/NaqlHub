@@ -34,6 +34,7 @@ export default async function JobsPage({
   const destination = pick(sp, "destination").trim();
   const cargoType = pick(sp, "cargo_type").trim();
   const vehicleType = pick(sp, "vehicle_type").trim();
+  const weight = pick(sp, "weight").trim();
 
   let query = supabaseAdmin
     .from("transport_jobs")
@@ -45,6 +46,17 @@ export default async function JobsPage({
   if (destination) query = query.ilike("destination_city", `%${destination}%`);
   if (cargoType) query = query.eq("cargo_type", cargoType);
   if (vehicleType) query = query.eq("vehicle_type", vehicleType);
+  if (weight === "0-10000") {
+  query = query.lte("weight_kg", 10000);
+}
+
+if (weight === "10000-30000") {
+  query = query.gte("weight_kg", 10000).lte("weight_kg", 30000);
+}
+
+if (weight === "30000+") {
+  query = query.gte("weight_kg", 30000);
+}
 
   const { data: jobs } = await query;
   const jobCount = jobs?.length || 0;
@@ -60,7 +72,8 @@ export default async function JobsPage({
   if (destination) homeQuery.set("destination", destination);
   if (cargoType) homeQuery.set("cargo_type", cargoType);
   if (vehicleType) homeQuery.set("vehicle_type", vehicleType);
-
+  if (weight) homeQuery.set("weight", weight);
+  
   const homeSearchHref = homeQuery.toString() ? `/?${homeQuery}` : "/";
 
   return (

@@ -36,21 +36,23 @@ export default function SiteHeader({ sticky }: SiteHeaderProps) {
           >
             Job Alerts
           </Link>
-
-          <Link
-            href="/create-listing"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
-          >
-            Post Job
-          </Link>
         </nav>
 
-        <Link
-          href="/create-listing"
-          className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300"
-        >
-          Post a Job
-        </Link>
+        <div className="flex items-center gap-2">
+  <Link
+    href="/jobs"
+    className="text-sm font-medium text-slate-600 hover:text-slate-900 md:hidden"
+  >
+    Jobs
+  </Link>
+
+  <Link
+    href="/create-listing"
+    className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-300"
+  >
+    Post a Job
+  </Link>
+</div>
       </div>
     </header>
   );

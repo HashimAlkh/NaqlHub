@@ -194,28 +194,28 @@ export default async function HomePage() {
 
           {/* ── Desktop search form (≥ lg) ── */}
           <div className="hidden lg:block pt-4">
-            <div className="w-[600px] rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl">
+            <form action="/jobs" className="w-[600px] rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl">
               {/* Row 1: From | To | Cargo Type */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">From</label>
                   <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
-                    <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                    <MapPin className="h-4 w-4 shrink-0 text-amber-400/80" />
                     <input
                       name="origin"
                       placeholder="City or Region"
-                      className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none"
+                      className="w-full bg-transparent text-sm font-medium text-white placeholder:text-slate-500 outline-none"
                     />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">To</label>
                   <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
-                    <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                    <MapPin className="h-4 w-4 shrink-0 text-amber-400/80" />
                     <input
                       name="destination"
                       placeholder="City or Region"
-                      className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none"
+                      className="w-full bg-transparent text-sm font-medium text-white placeholder:text-slate-500 outline-none"
                     />
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export default async function HomePage() {
                   <select
                     name="cargo_type"
                     defaultValue=""
-                    className="flex h-[42px] text-slate-400 items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3"
+                    className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3 text-sm font-medium text-white outline-none focus:border-amber-400"
                   >
                     <option value="">All Types</option>
                     <option value="heavy_equipment">Heavy Equipment</option>
@@ -240,7 +240,7 @@ export default async function HomePage() {
                   <select
                     name="vehicle_type"
                     defaultValue=""
-                    className="flex h-[42px] text-slate-400 items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3"
+                    className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3 text-sm font-medium text-white outline-none focus:border-amber-400"
                   >
                     <option value="">All Vehicles</option>
                     <option value="lowbed_trailer">Lowbed Trailer</option>
@@ -253,7 +253,7 @@ export default async function HomePage() {
                   <select
                     name="weight"
                     defaultValue=""
-                    className="flex h-[42px] text-slate-400 items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3"
+                    className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3 text-sm font-medium text-white outline-none focus:border-amber-400"
                   >
                     <option value="">Any Weight</option>
                     <option value="0-10000">Up to 10,000 kg</option>
@@ -263,16 +263,16 @@ export default async function HomePage() {
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-transparent select-none">Search</label>
-                  <Link
-                    href="/jobs"
+                  <button
+                    type="submit"
                     className="flex h-[42px] items-center justify-center gap-2 rounded-xl bg-amber-400 text-sm font-bold text-slate-950 hover:bg-amber-300 transition-colors"
                   >
-                    <Search className="h-4 w-4" />
-                    Search Jobs
-                  </Link>
+                  <Search className="h-4 w-4" />
+                      Search Jobs
+                  </button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
 
         </div>

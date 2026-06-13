@@ -28,7 +28,9 @@ export default async function JobDetailPage({
     .from("transport_jobs")
     .select("*")
     .eq("id", id)
+    .eq("status", "approved")
     .single();
+
 
   if (!job) notFound();
 
@@ -71,7 +73,9 @@ export default async function JobDetailPage({
             <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5 backdrop-blur">
               <div className="text-sm text-slate-300">Estimated budget</div>
               <div className="mt-1 text-3xl font-semibold text-emerald-300">
-                {job.budget_sar ? `SAR ${job.budget_sar}` : "Open"}
+                {job.budget_sar
+                  ? `SAR ${Number(job.budget_sar).toLocaleString()}`
+                  : "Open"}
               </div>
               <div className="mt-2 text-xs text-slate-400">
                 Payment is handled directly between shipper and carrier.
@@ -106,7 +110,7 @@ export default async function JobDetailPage({
                   job.height_m || "-"
                 } m`}
               />
-              <InfoCard label="Status" value={job.status || "pending"} />
+              <InfoCard label="Budget" value={job.budget_sar ? `SAR ${Number(job.budget_sar).toLocaleString()}` : "Open"} />
             </div>
           </div>
 

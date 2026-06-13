@@ -20,43 +20,46 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://med-stay.de/"),
+  metadataBase: new URL("https://naqlhub.com/"),
 
-  title: "medstay – Wohnungen für PJ, Famulatur & Pflegepraktikum",
+  title: "NaqlHub | Heavy Transport Marketplace Saudi Arabia",
   description:
-    "Finde passende Wohnungen für dein PJ, deine Famulatur oder dein Pflegepraktikum – speziell für Medizinstudierende.",
-  
+    "Find trusted transport providers for heavy equipment, oversized cargo and industrial loads across Saudi Arabia.",
+
   alternates: {
-    canonical: "https://med-stay.de/",
+    canonical: "https://naqlhub.com/",
   },
+
   icons: {
-    icon: "/medstay-icon.svg",
-    shortcut: "/medstay-icon.svg",
-    apple: "/medstay-icon.svg",
+    icon: "/naqlhub-icon.svg",
+    shortcut: "/naqlhub-icon.svg",
+    apple: "/naqlhub-icon.svg",
   },
 
   openGraph: {
-    title: "medstay",
-    description: "Wohnungen für PJ, Famulatur & Pflegepraktikum.",
-    url: "https://med-stay.de/",
-    siteName: "medstay",
-    locale: "de_DE",
+    title: "NaqlHub | Heavy Transport Marketplace Saudi Arabia",
+    description:
+      "Find trusted transport providers for heavy equipment, oversized cargo and industrial loads across Saudi Arabia.",
+    url: "https://naqlhub.com/",
+    siteName: "NaqlHub",
+    locale: "en_SA",
     type: "website",
     images: [
       {
-        url: "https://med-stay.de/og-image.jpg",
+        url: "https://naqlhub.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "medstay",
+        alt: "NaqlHub",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "medstay",
-    description: "Wohnungen für PJ, Famulatur & Pflegepraktikum.",
-    images: ["https://med-stay.de/og-image.jpg"],
+    title: "NaqlHub | Heavy Transport Marketplace Saudi Arabia",
+    description:
+      "Find trusted transport providers for heavy equipment, oversized cargo and industrial loads across Saudi Arabia.",
+    images: ["https://naqlhub.com/og-image.jpg"],
   },
 };
 
@@ -66,7 +69,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
