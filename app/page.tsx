@@ -75,7 +75,7 @@ export default async function HomePage() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(90deg,#07152b 0%,#07152b 38%,rgba(7,21,43,.92) 52%,rgba(7,21,43,.3) 75%,rgba(7,21,43,0) 100%)",
+                "linear-gradient(90deg,#07152b 0%,#07152b 38%,rgba(7,21,43,.92) 42%,rgba(7,21,43,.3) 75%,rgba(7,21,43,0) 100%)",
             }}
           />
         </div>
@@ -83,7 +83,7 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-7xl px-6 py-2 lg:px-10">
 
           {/* ── Mobile hero image (< lg) ── */}
-          <div className="relative left-1/2 h-[200px] w-screen -translate-x-1/2 overflow-hidden lg:hidden">
+          <div className="relative left-1/2 h-[240px] w-screen -translate-x-1/2 overflow-hidden lg:hidden">
             <img
               src="/truck-hero.png"
               alt="Heavy transport truck"
