@@ -15,6 +15,7 @@ type TransportJob = {
   destination_city: string | null;
   pickup_date: string | null;
   urgency: string | null;
+  image_urls: string[] | null;
 };
 
 export default function FeaturedJobsCarouselClient({

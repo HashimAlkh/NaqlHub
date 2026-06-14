@@ -45,7 +45,9 @@ export default function JobCard({ job }: { job: any }) {
      <div className="relative h-56 shrink-0 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105"
-          style={{ backgroundImage: "url('/truck-hero.png')" }}
+          style={{
+  backgroundImage: `url('${job.image_urls?.[0] || "/truck-hero.png"}')`,
+}}
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-slate-950/10 to-transparent" />

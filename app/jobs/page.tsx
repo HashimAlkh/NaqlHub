@@ -1,13 +1,12 @@
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import SiteHeader from "@/app/components/SiteHeader";
+import JobCard from "@/app/components/JobCard";
 import Link from "next/link";
 import {
   Search,
   MapPin,
   Package,
   Truck,
-  Calendar,
-  ArrowRight,
 } from "lucide-react";
 
 function formatValue(value: string | null | undefined) {
@@ -153,56 +152,9 @@ if (weight === "30000+") {
 
 
         {jobs && jobs.length > 0 ? (
-          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-6 md:grid-cols-2 xl:grid-cols-2">
             {jobs.map((job) => (
-              <Link
-                href={`/jobs/${job.id}`}
-                key={job.id}
-                className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase text-amber-700">
-                    {job.urgency || "normal"}
-                  </span>
-
-                  <span className="text-sm font-bold text-emerald-700">
-                    {job.budget_sar
-                      ? `SAR ${Number(job.budget_sar).toLocaleString()}`
-                      : "Open"}
-                  </span>
-                </div>
-
-                <h2 className="mt-4 line-clamp-2 text-xl font-bold leading-snug tracking-tight text-slate-950">
-                  {job.title}
-                </h2>
-
-                <div className="mt-5 rounded-2xl bg-slate-50 p-4">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Route
-                  </div>
-
-                  <div className="mt-1 text-base font-bold text-slate-950">
-                    {job.origin_city} → {job.destination_city}
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <MiniCard label="Weight" value={`${job.weight_kg} Kg`} />
-                  <MiniCard label="Vehicle" value={formatValue(job.vehicle_type)} />
-                  <MiniCard label="Cargo" value={formatValue(job.cargo_type)} />
-                  <MiniCard label="Pickup" value={job.pickup_date || "Not set"} />
-                </div>
-
-                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                  <span className="text-sm font-semibold text-slate-500">
-                    View details
-                  </span>
-
-                  <span className="inline-flex items-center gap-1 text-sm font-bold text-amber-600">
-                    Contact <ArrowRight className="h-4 w-4" />
-                  </span>
-                </div>
-              </Link>
+              <JobCard key={job.id} job={job} />
             ))}
           </div>
         ) : (
@@ -275,18 +227,6 @@ function SummaryItem({
         <div className="mt-1 text-sm font-bold capitalize text-slate-950">
           {value}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function MiniCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-3">
-      <div className="text-xs text-slate-500">{label}</div>
-
-      <div className="mt-1 line-clamp-1 font-bold capitalize text-slate-950">
-        {value}
       </div>
     </div>
   );

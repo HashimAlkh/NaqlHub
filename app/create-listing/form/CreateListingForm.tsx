@@ -1,9 +1,64 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { createTransportJob } from "./actions";
 
 type InitialDraft = null;
+
+const MAX_IMAGES = 5;
+const MAX_IMAGE_WIDTH = 1600;
+const IMAGE_QUALITY = 0.78;
+
+type SelectedImage = {
+  id: string;
+  file: File;
+  previewUrl: string;
+};
+
+async function compressImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Only image files are allowed.");
+  }
+
+  const imageUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = imageUrl;
+    });
+
+    const scale = Math.min(1, MAX_IMAGE_WIDTH / image.width);
+    const width = Math.round(image.width * scale);
+    const height = Math.round(image.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Image could not be processed.");
+
+    ctx.drawImage(image, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", IMAGE_QUALITY);
+    });
+
+    if (!blob) throw new Error("Image could not be compressed.");
+
+    const cleanName = file.name.replace(/\.[^/.]+$/, "");
+
+    return new File([blob], `${cleanName}.jpg`, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+}
 
 function SubmitButton({ submitting }: { submitting: boolean }) {
   return (
@@ -23,6 +78,51 @@ export default function CreateListingForm({
   initialDraft?: InitialDraft;
 }) {
   const [submitting, setSubmitting] = useState(false);
+  const [images, setImages] = useState<SelectedImage[]>([]);
+  const remainingImageSlots = useMemo(
+    () => Math.max(0, MAX_IMAGES - images.length),
+    [images.length]
+  );
+
+  async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const allowedFiles = files.slice(0, remainingImageSlots);
+
+    try {
+      const compressedImages = await Promise.all(
+        allowedFiles.map(async (file) => {
+          const compressed = await compressImage(file);
+
+          return {
+            id: `${compressed.name}-${compressed.lastModified}-${Math.random()}`,
+            file: compressed,
+            previewUrl: URL.createObjectURL(compressed),
+          };
+        })
+      );
+
+      setImages((current) => [...current, ...compressedImages]);
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "One or more images could not be processed."
+      );
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  function removeImage(id: string) {
+    setImages((current) => {
+      const image = current.find((item) => item.id === id);
+      if (image) URL.revokeObjectURL(image.previewUrl);
+      return current.filter((item) => item.id !== id);
+    });
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,6 +130,10 @@ export default function CreateListingForm({
 
     const form = e.currentTarget;
     const formData = new FormData(form);
+    formData.delete("images");
+    images.forEach((image) => {
+      formData.append("images", image.file);
+    });
 
     try {
   await createTransportJob(formData);
@@ -175,6 +279,73 @@ function fillTestData() {
               className="ms-input mt-1"
             />
           </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Photos</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Add up to {MAX_IMAGES} photos of the cargo, equipment or loading situation.
+            </p>
+          </div>
+
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+            {images.length}/{MAX_IMAGES}
+          </span>
+        </div>
+
+        <div className="mt-4 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5">
+          <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl bg-white px-5 py-8 text-center transition hover:bg-slate-100">
+            <input
+              name="images"
+              type="file"
+              accept="image/*"
+              multiple
+              disabled={remainingImageSlots === 0}
+              onChange={handleImageChange}
+              className="hidden"
+            />
+
+            <span className="text-sm font-semibold text-slate-900">
+              Upload cargo photos
+            </span>
+            <span className="mt-1 text-xs text-slate-500">
+              JPG, PNG or HEIC. Images are compressed before upload.
+            </span>
+          </label>
+
+          {images.length > 0 && (
+            <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+              {images.map((image, index) => (
+                <div
+                  key={image.id}
+                  className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-200"
+                >
+                  <img
+                    src={image.previewUrl}
+                    alt={`Cargo photo ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+
+                  {index === 0 && (
+                    <div className="absolute left-2 top-2 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-bold text-slate-950 shadow-sm">
+                      Main
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => removeImage(image.id)}
+                    className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-bold text-white opacity-100 transition hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -7,6 +7,24 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const JOB_IMAGES_BUCKET = "job-images";
+const MAX_IMAGES = 5;
+
+function safeFileName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9.\-_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getImageFiles(formData: FormData) {
+  return formData
+    .getAll("images")
+    .filter((value): value is File => value instanceof File && value.size > 0)
+    .slice(0, MAX_IMAGES);
+}
+
 function optionalNumber(value: FormDataEntryValue | null) {
   if (value === null) return null;
   const raw = String(value).trim();
@@ -30,6 +48,8 @@ export async function createTransportJob(formData: FormData) {
       redirectTo: "/create-listing/success",
     };
   }
+
+  const imageFiles = getImageFiles(formData);
 
   const payload = {
     title: requiredString(formData, "title"),
@@ -58,6 +78,45 @@ export async function createTransportJob(formData: FormData) {
 
   if (error || !data) {
     throw new Error(error?.message || "Transport job could not be saved");
+  }
+
+  const uploadedImageUrls: string[] = [];
+
+  for (let index = 0; index < imageFiles.length; index += 1) {
+    const file = imageFiles[index];
+    const fileExt = file.name.split(".").pop() || "jpg";
+    const fileName = `${index + 1}-${Date.now()}-${safeFileName(
+      file.name || `image.${fileExt}`
+    )}`;
+    const filePath = `${data.id}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(JOB_IMAGES_BUCKET)
+      .upload(filePath, file, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(JOB_IMAGES_BUCKET)
+      .getPublicUrl(filePath);
+
+    uploadedImageUrls.push(publicUrlData.publicUrl);
+  }
+
+  if (uploadedImageUrls.length > 0) {
+    const { error: imageUpdateError } = await supabase
+      .from("transport_jobs")
+      .update({ image_urls: uploadedImageUrls })
+      .eq("id", data.id);
+
+    if (imageUpdateError) {
+      throw new Error(imageUpdateError.message);
+    }
   }
 
   return {
