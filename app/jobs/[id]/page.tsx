@@ -61,7 +61,6 @@ export default async function JobDetailPage({
       ? job.image_urls
       : ["/truck-hero.png"];
 
-
   const dimensions = `${job.length_m || "-"} × ${job.width_m || "-"} × ${
     job.height_m || "-"
   } m`;
@@ -70,70 +69,71 @@ export default async function JobDetailPage({
     <main className="min-h-screen bg-[#f2f3f5] text-slate-900">
       <SiteHeader sticky />
 
-      <section className="mx-auto max-w-7xl px-5 py-7 lg:px-10 lg:py-10">
+      <section className="mx-auto max-w-7xl px-4 py-6 md:px-5 lg:px-10 lg:py-10">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-          {/* LEFT MAIN CARD */}
           <article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-<JobGallery images={images} title={job.title}>
-  <Link
-    href="/jobs"
-    className="absolute left-5 top-5 z-20 inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
-  >
-    ← Back to jobs
-  </Link>
+            <JobGallery images={images} title={job.title}>
+              <Link
+                href="/jobs"
+                className="absolute left-5 top-5 z-20 inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
+              >
+                ← Back to jobs
+              </Link>
 
-  <div className="absolute bottom-0 left-0 right-0 z-20 hidden p-5 md:block md:p-7">
-    <h1 className="max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow md:text-[34px]">
-      {job.title}
-    </h1>
+              {/* Desktop title overlay */}
+              <div className="absolute bottom-0 left-0 right-0 z-20 hidden p-5 md:block md:p-7">
+                <h1 className="max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow md:text-[34px]">
+                  {job.title}
+                </h1>
 
-    <div className="mt-4 flex flex-wrap items-center gap-5 text-sm font-semibold text-white/95">
-      <span className="inline-flex items-center gap-2">
-        <MapPin className="h-4 w-4" />
-        {job.origin_city}
-      </span>
+                <div className="mt-4 flex flex-wrap items-center gap-5 text-sm font-semibold text-white/95">
+                  <span className="inline-flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    {job.origin_city}
+                  </span>
 
-      <span className="font-black text-amber-300">→</span>
+                  <span className="font-black text-amber-300">→</span>
 
-      <span className="inline-flex items-center gap-2">
-        <MapPin className="h-4 w-4" />
-        {job.destination_city}
-      </span>
+                  <span className="inline-flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    {job.destination_city}
+                  </span>
 
-      <span className="inline-flex items-center gap-2">
-        <Calendar className="h-4 w-4" />
-        {formatDate(job.pickup_date)}
-      </span>
-    </div>
-  </div>
-</JobGallery>
+                  <span className="inline-flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {formatDate(job.pickup_date)}
+                  </span>
+                </div>
+              </div>
+            </JobGallery>
 
-<div className="relative z-10 -mt-8 bg-white px-5 pb-2 pt-6 md:hidden">
-  <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-slate-950">
-    {job.title}
-  </h1>
+            {/* Mobile title panel */}
+            <div className="relative z-20 -mt-8 mx-4 rounded-t-[2rem] bg-white px-5 pb-4 pt-6 md:hidden">
+              <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-slate-950">
+                {job.title}
+              </h1>
 
-  <div className="mt-4 flex items-center gap-3 text-sm font-bold text-slate-900">
-    <span className="inline-flex min-w-0 items-center gap-2">
-      <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
-      <span className="truncate">{job.origin_city}</span>
-    </span>
+              <div className="mt-4 flex items-center gap-3 text-sm font-bold text-slate-900">
+                <span className="inline-flex min-w-0 items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
+                  <span className="truncate">{job.origin_city}</span>
+                </span>
 
-    <span className="shrink-0 font-black text-amber-500">→</span>
+                <span className="shrink-0 font-black text-amber-500">→</span>
 
-    <span className="inline-flex min-w-0 items-center gap-2">
-      <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
-      <span className="truncate">{job.destination_city}</span>
-    </span>
-  </div>
+                <span className="inline-flex min-w-0 items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
+                  <span className="truncate">{job.destination_city}</span>
+                </span>
+              </div>
 
-  <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
-    <Calendar className="h-4 w-4 text-slate-500" />
-    {formatDate(job.pickup_date)}
-  </div>
-</div>
+              <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
+                <Calendar className="h-4 w-4 text-slate-500" />
+                {formatDate(job.pickup_date)}
+              </div>
+            </div>
 
-            <div className="grid gap-3 px-5 pb-5 pt-4 sm:grid-cols-2 lg:grid-cols-4 lg:pt-5">
+            <div className="grid grid-cols-2 gap-3 px-4 pb-5 pt-4 md:px-5 lg:grid-cols-4 lg:pt-5">
               <FactItem
                 icon={<Weight className="h-5 w-5" />}
                 label="Weight"
@@ -170,7 +170,6 @@ export default async function JobDetailPage({
             </div>
           </article>
 
-          {/* RIGHT CONTACT CARD */}
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="text-base font-extrabold text-slate-950">
@@ -247,7 +246,7 @@ function FactItem({
   value: string | number;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm md:p-4">
       <div className="flex items-center gap-2 text-slate-500">
         <span className="text-amber-500">{icon}</span>
         <span className="text-[11px] font-extrabold uppercase tracking-wide">
