@@ -33,7 +33,7 @@ export default function JobCard({ job }: { job: any }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
-      className="group flex h-[450px] flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      className="group flex h-[400px] flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
       <div className="relative h-56 shrink-0 overflow-visible">
         <div
@@ -59,14 +59,14 @@ export default function JobCard({ job }: { job: any }) {
             : "Open"}
         </div>
 
-        <div className="absolute bottom-5 left-4 z-10">
+        <div className="absolute top-[168px] left-4 z-10">
           <span className="rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-bold capitalize text-slate-700 shadow-md backdrop-blur">
             {formatValue(job.cargo_type)}
           </span>
         </div>
       </div>
 
-      <div className="relative -mt-6 flex flex-1 flex-col rounded-t-[1.75rem] bg-white px-5 pb-5 pt-6">
+      <div className="relative -mt-6 flex flex-1 flex-col rounded-t-[1.75rem] bg-white px-5 pb-5 pt-4">
         <h3 className="min-h-[72px] line-clamp-2 text-xl font-extrabold leading-tight text-slate-950">
           {job.title}
         </h3>
@@ -76,7 +76,7 @@ export default function JobCard({ job }: { job: any }) {
           {formatDate(job.pickup_date)}
         </div>
 
-        <div className="mt-4 flex h-[28px] items-center gap-3 text-sm font-bold text-slate-900">
+        <div className="mt-2 mb-3 flex h-[28px] items-center gap-3 text-sm font-bold text-slate-900">
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
             <span className="truncate">{job.origin_city}</span>
@@ -90,7 +90,7 @@ export default function JobCard({ job }: { job: any }) {
           </span>
         </div>
 
-        <div className="mt-auto border-t border-slate-100 pt-4">
+        <div className="mt-auto border-t border-slate-100 pt-3">
           <div className="grid grid-cols-2 gap-4 text-sm font-semibold text-slate-700">
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
               <Package className="h-4 w-4 shrink-0 text-slate-500" />

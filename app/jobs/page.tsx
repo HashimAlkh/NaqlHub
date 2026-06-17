@@ -79,12 +79,12 @@ if (weight === "30000+") {
     <main className="min-h-screen bg-[#f2f3f5] text-slate-900">
       <SiteHeader sticky />
 
-      <section className="mx-auto max-w-7xl px-5 py-8 md:px-8 lg:px-10 lg:py-10">
+      <section className="mx-auto max-w-[1600px] px-5 py-8 md:px-8 lg:px-10 lg:py-10">
         {/* Header */}
 <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
   <div>
     <h1 className="text-3xl font-bold tracking-tight text-slate-950">
-      Transport jobs
+      TEST Transport jobs
     </h1>
 
     <p className="mt-2 text-base text-slate-600">
@@ -152,7 +152,7 @@ if (weight === "30000+") {
 
 
         {jobs && jobs.length > 0 ? (
-          <div className="mt-5 grid gap-6 md:grid-cols-2 xl:grid-cols-2">
+         <div className="mt-5 grid gap-5 md:grid-cols-3 xl:grid-cols-4">
             {jobs.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
