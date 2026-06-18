@@ -20,10 +20,13 @@ type TransportJob = {
 
 export default function FeaturedJobsCarouselClient({
   jobs,
+  favoriteJobIds = [],
 }: {
   jobs: TransportJob[];
+  favoriteJobIds?: string[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const favoriteSet = new Set(favoriteJobIds);
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -68,7 +71,7 @@ export default function FeaturedJobsCarouselClient({
               key={job.id}
               className="w-[calc(100vw-40px)] max-w-[360px] shrink-0 snap-start sm:w-[360px] lg:w-[360px]"
             >
-              <JobCard job={job} />
+              <JobCard job={job} isFavorited={favoriteSet.has(job.id)} />
             </div>
           ))}
         </div>

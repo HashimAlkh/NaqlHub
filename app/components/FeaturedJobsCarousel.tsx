@@ -1,5 +1,7 @@
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import FeaturedJobsCarouselClient from "./FeaturedJobsCarouselClient";
+import { getCurrentUser } from "@/app/lib/auth";
+import { getFavoriteJobIds } from "@/app/lib/favorites";
 
 type TransportJob = {
   id: string;
@@ -32,6 +34,18 @@ export default async function FeaturedJobsCarousel() {
 
   const jobs = (data ?? []) as TransportJob[];
   if (jobs.length === 0) return null;
+  const user = await getCurrentUser();
+  const favoriteJobIds = user
+    ? await getFavoriteJobIds(
+        user.id,
+        jobs.map((job) => job.id)
+      )
+    : new Set<string>();
 
-  return <FeaturedJobsCarouselClient jobs={jobs} />;
+  return (
+    <FeaturedJobsCarouselClient
+      jobs={jobs}
+      favoriteJobIds={Array.from(favoriteJobIds)}
+    />
+  );
 }

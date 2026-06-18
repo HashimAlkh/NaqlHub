@@ -12,6 +12,9 @@ import {
   Weight,
 } from "lucide-react";
 import JobGallery from "@/app/components/JobGallery";
+import FavoriteButton from "@/app/components/FavoriteButton";
+import { getCurrentUser } from "@/app/lib/auth";
+import { getFavoriteJobIds } from "@/app/lib/favorites";
 
 function formatValue(value: string | null | undefined) {
   if (!value) return "Not specified";
@@ -55,6 +58,9 @@ export default async function JobDetailPage({
     .single();
 
   if (!job) notFound();
+
+  const user = await getCurrentUser();
+  const favoriteJobIds = user ? await getFavoriteJobIds(user.id, [job.id]) : new Set<string>();
 
   const images =
     Array.isArray(job.image_urls) && job.image_urls.length > 0
@@ -211,6 +217,14 @@ export default async function JobDetailPage({
               >
                 Contact via WhatsApp
               </a>
+
+              <FavoriteButton
+                jobId={job.id}
+                initialFavorited={favoriteJobIds.has(job.id)}
+                className="mt-3 h-11 w-full rounded-xl border border-slate-200"
+                label="Save job"
+                showText
+              />
 
               <Link
                 href="/jobs"

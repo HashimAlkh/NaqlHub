@@ -2,6 +2,8 @@ import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import SiteHeader from "@/app/components/SiteHeader";
 import JobCard from "@/app/components/JobCard";
 import Link from "next/link";
+import { getCurrentUser } from "@/app/lib/auth";
+import { getFavoriteJobIds } from "@/app/lib/favorites";
 import {
   Search,
   MapPin,
@@ -58,6 +60,13 @@ if (weight === "30000+") {
 }
 
   const { data: jobs } = await query;
+  const user = await getCurrentUser();
+  const favoriteJobIds = user
+    ? await getFavoriteJobIds(
+        user.id,
+        (jobs || []).map((job) => job.id)
+      )
+    : new Set<string>();
   const jobCount = jobs?.length || 0;
 
   const hasRouteFilter = !!(origin || destination);
@@ -154,7 +163,11 @@ if (weight === "30000+") {
         {jobs && jobs.length > 0 ? (
          <div className="mt-5 grid gap-5 md:grid-cols-3 xl:grid-cols-4">
             {jobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard
+                key={job.id}
+                job={job}
+                isFavorited={favoriteJobIds.has(job.id)}
+              />
             ))}
           </div>
         ) : (

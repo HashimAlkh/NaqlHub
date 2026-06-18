@@ -1,5 +1,20 @@
 import Link from "next/link";
 import { MapPin, Package, Truck, Calendar } from "lucide-react";
+import FavoriteButton from "./FavoriteButton";
+
+export type JobCardJob = {
+  id: string;
+  title: string | null;
+  cargo_type: string | null;
+  vehicle_type: string | null;
+  weight_kg: number | null;
+  budget_sar: number | null;
+  origin_city: string | null;
+  destination_city: string | null;
+  pickup_date: string | null;
+  urgency: string | null;
+  image_urls: string[] | null;
+};
 
 function formatValue(value: string | null | undefined) {
   if (!value) return "Not specified";
@@ -26,15 +41,24 @@ const urgencyConfig: Record<string, { label: string; className: string }> = {
   normal: { label: "NORMAL", className: "bg-slate-100 text-slate-600" },
 };
 
-export default function JobCard({ job }: { job: any }) {
+export default function JobCard({
+  job,
+  isFavorited = false,
+}: {
+  job: JobCardJob;
+  isFavorited?: boolean;
+}) {
   const tag = (job.urgency || "new").toLowerCase();
   const { label, className } = urgencyConfig[tag] ?? urgencyConfig.normal;
 
   return (
-    <Link
-      href={`/jobs/${job.id}`}
-      className="group flex h-[400px] flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-    >
+    <article className="group relative flex h-[400px] flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+      <Link
+        href={`/jobs/${job.id}`}
+        className="absolute inset-0 z-10"
+        aria-label={`View ${job.title || "transport job"}`}
+      />
+
       <div className="relative h-56 shrink-0 overflow-visible">
         <div
           className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105"
@@ -53,16 +77,19 @@ export default function JobCard({ job }: { job: any }) {
           </span>
         </div>
 
-        <div className="absolute right-4 top-4 rounded-full bg-white/95 px-4 py-1.5 text-sm font-extrabold text-emerald-700 shadow-sm">
+        <div className="absolute right-4 top-4 z-20">
+          <FavoriteButton
+            jobId={job.id}
+            initialFavorited={isFavorited}
+            variant="bare"
+            className="h-9 w-9"
+          />
+        </div>
+
+        <div className="absolute bottom-8 right-4 z-10 rounded-full bg-white/95 px-2.5 py-1 text-sm font-extrabold text-slate-900 shadow-md backdrop-blur">
           {job.budget_sar
             ? `SAR ${Number(job.budget_sar).toLocaleString()}`
             : "Open"}
-        </div>
-
-        <div className="absolute top-[168px] left-4 z-10">
-          <span className="rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-bold capitalize text-slate-700 shadow-md backdrop-blur">
-            {formatValue(job.cargo_type)}
-          </span>
         </div>
       </div>
 
@@ -90,22 +117,32 @@ export default function JobCard({ job }: { job: any }) {
           </span>
         </div>
 
-        <div className="mt-auto border-t border-slate-100 pt-3">
-          <div className="grid grid-cols-2 gap-4 text-sm font-semibold text-slate-700">
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-              <Package className="h-4 w-4 shrink-0 text-slate-500" />
-              {job.weight_kg
-                ? `${Number(job.weight_kg).toLocaleString()} kg`
-                : "Weight not set"}
+<div className="mt-auto border-t border-slate-100 pt-3">
+
+  <div className="grid grid-cols-3 divide-x divide-slate-100 text-[11px] font-semibold text-slate-700">
+
+    <span className="inline-flex min-w-0 items-center gap-1 pr-2">
+
+      <Package className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+
+      <span className="truncate">
+                {job.weight_kg
+                  ? `${Number(job.weight_kg).toLocaleString()} kg`
+                  : "Weight not set"}
+              </span>
             </span>
 
-            <span className="inline-flex min-w-0 items-center gap-1.5">
+            <span className="inline-flex min-w-0 items-center gap-1.5 px-3">
               <Truck className="h-4 w-4 shrink-0 text-slate-500" />
               <span className="truncate">{formatValue(job.vehicle_type)}</span>
+            </span>
+
+            <span className="truncate pl-3 capitalize">
+              {formatValue(job.cargo_type)}
             </span>
           </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
