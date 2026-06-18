@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/app/lib/auth";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -39,19 +41,8 @@ function requiredString(formData: FormData, key: string) {
   return value;
 }
 
-export async function createTransportJob(formData: FormData) {
-  const company = String(formData.get("company") || "").trim();
-
-  if (company.length > 0) {
-    return {
-      ok: true,
-      redirectTo: "/create-listing/success",
-    };
-  }
-
-  const imageFiles = getImageFiles(formData);
-
-  const payload = {
+function jobPayload(formData: FormData, userId: string) {
+  return {
     title: requiredString(formData, "title"),
     cargo_type: requiredString(formData, "cargo_type"),
     vehicle_type: requiredString(formData, "vehicle_type"),
@@ -67,19 +58,11 @@ export async function createTransportJob(formData: FormData) {
     description: requiredString(formData, "description"),
     contact_name: requiredString(formData, "contact_name"),
     whatsapp_number: requiredString(formData, "whatsapp_number"),
-    status: "approved",
+    user_id: userId,
   };
+}
 
-  const { data, error } = await supabase
-    .from("transport_jobs")
-    .insert([payload])
-    .select("id")
-    .single();
-
-  if (error || !data) {
-    throw new Error(error?.message || "Transport job could not be saved");
-  }
-
+async function uploadJobImages(jobId: string, imageFiles: File[]) {
   const uploadedImageUrls: string[] = [];
 
   for (let index = 0; index < imageFiles.length; index += 1) {
@@ -88,7 +71,7 @@ export async function createTransportJob(formData: FormData) {
     const fileName = `${index + 1}-${Date.now()}-${safeFileName(
       file.name || `image.${fileExt}`
     )}`;
-    const filePath = `${data.id}/${fileName}`;
+    const filePath = `${jobId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from(JOB_IMAGES_BUCKET)
@@ -108,6 +91,60 @@ export async function createTransportJob(formData: FormData) {
     uploadedImageUrls.push(publicUrlData.publicUrl);
   }
 
+  return uploadedImageUrls;
+}
+
+function remainingImageUrls(formData: FormData) {
+  const raw = String(formData.get("remaining_image_urls") || "[]");
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((value): value is string => typeof value === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createTransportJob(formData: FormData) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      redirectTo: "/login?next=/create-listing/form",
+    };
+  }
+
+  const company = String(formData.get("company") || "").trim();
+
+  if (company.length > 0) {
+    return {
+      ok: true,
+      redirectTo: "/create-listing/success",
+    };
+  }
+
+  const imageFiles = getImageFiles(formData);
+
+  const payload = {
+    ...jobPayload(formData, user.id),
+    status: "active",
+  };
+
+  const { data, error } = await supabase
+    .from("transport_jobs")
+    .insert([payload])
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message || "Transport job could not be saved");
+  }
+
+  const uploadedImageUrls = await uploadJobImages(data.id, imageFiles);
+
   if (uploadedImageUrls.length > 0) {
     const { error: imageUpdateError } = await supabase
       .from("transport_jobs")
@@ -123,5 +160,62 @@ export async function createTransportJob(formData: FormData) {
     ok: true,
     jobId: data.id,
     redirectTo: "/create-listing/success",
+  };
+}
+
+export async function updateTransportJob(formData: FormData) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      redirectTo: "/login?next=/dashboard/jobs",
+    };
+  }
+
+  const jobId = String(formData.get("job_id") || "").trim();
+  if (!jobId) throw new Error("Job id is required");
+
+  const { data: existingJob, error: fetchError } = await supabase
+    .from("transport_jobs")
+    .select("id")
+    .eq("id", jobId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (fetchError || !existingJob) {
+    throw new Error("Job not found or you do not have permission.");
+  }
+
+  const retainedImageUrls = remainingImageUrls(formData);
+  const uploadedImageUrls = await uploadJobImages(jobId, getImageFiles(formData));
+  const image_urls = [...retainedImageUrls, ...uploadedImageUrls].slice(
+    0,
+    MAX_IMAGES
+  );
+
+  const { error } = await supabase
+    .from("transport_jobs")
+    .update({
+      ...jobPayload(formData, user.id),
+      image_urls,
+    })
+    .eq("id", jobId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard/jobs");
+  revalidatePath(`/dashboard/jobs/${jobId}/edit`);
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/jobs");
+  revalidatePath("/");
+
+  return {
+    ok: true,
+    jobId,
+    redirectTo: "/dashboard/jobs",
   };
 }

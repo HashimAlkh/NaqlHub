@@ -1,8 +1,13 @@
 import Link from "next/link";
 import SiteHeader from "../components/SiteHeader";
 import ListingFlow from "../components/ListingFlow";
+import { requireUser } from "../lib/auth";
 
-export default function CreateListingPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CreateListingPage() {
+  await requireUser("/login?next=/create-listing");
+
   return (
     <main className="min-h-screen bg-slate-50">
       <SiteHeader sticky />

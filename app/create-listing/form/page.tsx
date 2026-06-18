@@ -1,9 +1,12 @@
 import SiteHeader from "../../components/SiteHeader";
 import CreateListingForm from "../form/CreateListingForm";
+import { requireUser } from "../../lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default function CreateListingFormPage() {
+export default async function CreateListingFormPage() {
+  await requireUser("/login?next=/create-listing/form");
+
   return (
     <main className="min-h-screen bg-slate-50">
       <SiteHeader sticky />

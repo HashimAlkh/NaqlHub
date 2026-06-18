@@ -51,7 +51,7 @@ export default async function JobDetailPage({
     .from("transport_jobs")
     .select("*")
     .eq("id", id)
-    .eq("status", "approved")
+    .eq("status", "active")
     .single();
 
   if (!job) notFound();

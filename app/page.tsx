@@ -32,19 +32,19 @@ export default async function HomePage() {
   const { data: jobs } = await supabaseAdmin
     .from("transport_jobs")
     .select("*")
-    .eq("status", "approved")
+    .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(4);
 
   const { count: activeJobsCount } = await supabaseAdmin
     .from("transport_jobs")
     .select("*", { count: "exact", head: true })
-    .eq("status", "approved");
+    .eq("status", "active");
 
   const { data: cityRows } = await supabaseAdmin
     .from("transport_jobs")
     .select("origin_city,destination_city")
-    .eq("status", "approved");
+    .eq("status", "active");
 
   const citiesCoveredCount = new Set(
     (cityRows || [])
@@ -81,14 +81,14 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-6 py-2 lg:px-10">
+        <div className="relative mx-auto max-w-7xl px-0 py-0 lg:px-10 lg:py-2">
 
           {/* ── Mobile hero image (< lg) ── */}
-          <div className="relative left-1/2 h-[240px] w-screen -translate-x-1/2 overflow-hidden lg:hidden">
+          <div className="relative h-[240px] w-full overflow-hidden lg:hidden">
             <img
               src="/truck-hero.png"
               alt="Heavy transport truck"
-              className="h-full w-full object-contain"
+              className="h-full w-full object-cover"
             />
             {/* left-to-right fade: left half dark, right half transparent */}
             <div
@@ -136,7 +136,7 @@ export default async function HomePage() {
           </div>
 
           {/* ── Mobile search (< lg) ── */}
-          <div className="mt-0 lg:hidden">
+          <div className="mt-0 px-4 pb-4 lg:hidden">
             <div className="rounded-2xl border border-white/10 bg-[#0c1d35] p-3">
               <div className="space-y-2">
                 <label className="flex h-10 items-center gap-3 rounded-xl border border-white/10 bg-[#07152b] px-4 cursor-text">

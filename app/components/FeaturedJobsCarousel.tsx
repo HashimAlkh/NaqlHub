@@ -21,7 +21,7 @@ export default async function FeaturedJobsCarousel() {
     .select(
   "id,title,cargo_type,vehicle_type,weight_kg,budget_sar,origin_city,destination_city,pickup_date,urgency,image_urls,created_at"
 )
-    .eq("status", "approved")
+    .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(10);
 

@@ -1,9 +1,27 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useMemo, useState } from "react";
-import { createTransportJob } from "./actions";
+import { createTransportJob, updateTransportJob } from "./actions";
 
-type InitialDraft = null;
+export type TransportJobFormInitialValues = {
+  id?: string | null;
+  title?: string | null;
+  cargo_type?: string | null;
+  vehicle_type?: string | null;
+  weight_kg?: number | null;
+  budget_sar?: number | null;
+  length_m?: number | null;
+  width_m?: number | null;
+  height_m?: number | null;
+  origin_city?: string | null;
+  destination_city?: string | null;
+  pickup_date?: string | null;
+  urgency?: string | null;
+  description?: string | null;
+  contact_name?: string | null;
+  whatsapp_number?: string | null;
+  image_urls?: string[] | null;
+};
 
 const MAX_IMAGES = 5;
 const MAX_IMAGE_WIDTH = 1600;
@@ -60,14 +78,26 @@ async function compressImage(file: File): Promise<File> {
   }
 }
 
-function SubmitButton({ submitting }: { submitting: boolean }) {
+function SubmitButton({
+  submitting,
+  isEditing,
+}: {
+  submitting: boolean;
+  isEditing: boolean;
+}) {
   return (
     <button
       type="submit"
       disabled={submitting}
       className="w-full rounded-2xl bg-amber-400 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {submitting ? "Submitting job..." : "Submit Transport Job"}
+      {submitting
+        ? isEditing
+          ? "Saving changes..."
+          : "Submitting job..."
+        : isEditing
+          ? "Save Changes"
+          : "Submit Transport Job"}
     </button>
   );
 }
@@ -75,13 +105,20 @@ function SubmitButton({ submitting }: { submitting: boolean }) {
 export default function CreateListingForm({
   initialDraft,
 }: {
-  initialDraft?: InitialDraft;
+  initialDraft?: TransportJobFormInitialValues | null;
+  mode?: string;
+  readonly?: boolean;
+  manageToken?: string;
 }) {
+  const isEditing = Boolean(initialDraft?.id);
   const [submitting, setSubmitting] = useState(false);
   const [images, setImages] = useState<SelectedImage[]>([]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>(
+    () => initialDraft?.image_urls || []
+  );
   const remainingImageSlots = useMemo(
-    () => Math.max(0, MAX_IMAGES - images.length),
-    [images.length]
+    () => Math.max(0, MAX_IMAGES - images.length - existingImageUrls.length),
+    [existingImageUrls.length, images.length]
   );
 
   async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
@@ -124,6 +161,10 @@ export default function CreateListingForm({
     });
   }
 
+  function removeExistingImage(url: string) {
+    setExistingImageUrls((current) => current.filter((item) => item !== url));
+  }
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
@@ -131,22 +172,25 @@ export default function CreateListingForm({
     const form = e.currentTarget;
     const formData = new FormData(form);
     formData.delete("images");
+    formData.set("remaining_image_urls", JSON.stringify(existingImageUrls));
     images.forEach((image) => {
       formData.append("images", image.file);
     });
 
     try {
-  await createTransportJob(formData);
-  window.location.href = "/create-listing/success";
-} catch (error) {
-  console.error(error);
-  alert(
-    error instanceof Error
-      ? error.message
-      : "Transport job could not be saved."
-  );
-  setSubmitting(false);
-}
+      const result = isEditing
+        ? await updateTransportJob(formData)
+        : await createTransportJob(formData);
+      window.location.href = result.redirectTo || "/create-listing/success";
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Transport job could not be saved."
+      );
+      setSubmitting(false);
+    }
   }
 
 function fillTestData() {
@@ -196,6 +240,14 @@ function fillTestData() {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-8">
+      {initialDraft?.id && (
+        <input type="hidden" name="job_id" value={initialDraft.id} />
+      )}
+      <input
+        type="hidden"
+        name="remaining_image_urls"
+        value={JSON.stringify(existingImageUrls)}
+      />
       {process.env.NODE_ENV === "development" && (
   <button
     type="button"
@@ -223,6 +275,7 @@ function fillTestData() {
             <input
               name="title"
               type="text"
+              defaultValue={initialDraft?.title || ""}
               placeholder="e.g. Transport excavator from Riyadh to Jeddah"
               className="ms-input mt-1"
               required
@@ -231,7 +284,12 @@ function fillTestData() {
 
           <div>
             <label className="ms-label">Cargo type</label>
-            <select name="cargo_type" className="ms-input mt-1" required>
+            <select
+              name="cargo_type"
+              defaultValue={initialDraft?.cargo_type || ""}
+              className="ms-input mt-1"
+              required
+            >
               <option value="">Select cargo type</option>
               <option value="heavy_equipment">Heavy equipment</option>
               <option value="industrial_cargo">Industrial cargo</option>
@@ -246,7 +304,12 @@ function fillTestData() {
 
           <div>
             <label className="ms-label">Required vehicle</label>
-            <select name="vehicle_type" className="ms-input mt-1" required>
+            <select
+              name="vehicle_type"
+              defaultValue={initialDraft?.vehicle_type || ""}
+              className="ms-input mt-1"
+              required
+            >
               <option value="">Select vehicle type</option>
               <option value="lowbed_trailer">Lowbed trailer</option>
               <option value="flatbed_trailer">Flatbed trailer</option>
@@ -263,6 +326,7 @@ function fillTestData() {
               name="weight_kg"
               type="number"
               min={1}
+              defaultValue={initialDraft?.weight_kg ?? ""}
               placeholder="45000"
               className="ms-input mt-1"
               required
@@ -275,6 +339,7 @@ function fillTestData() {
               name="budget_sar"
               type="number"
               min={0}
+              defaultValue={initialDraft?.budget_sar ?? ""}
               placeholder="12000"
               className="ms-input mt-1"
             />
@@ -292,7 +357,7 @@ function fillTestData() {
           </div>
 
           <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-            {images.length}/{MAX_IMAGES}
+            {existingImageUrls.length + images.length}/{MAX_IMAGES}
           </span>
         </div>
 
@@ -316,8 +381,35 @@ function fillTestData() {
             </span>
           </label>
 
-          {images.length > 0 && (
+          {(existingImageUrls.length > 0 || images.length > 0) && (
             <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
+              {existingImageUrls.map((url, index) => (
+                <div
+                  key={url}
+                  className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-200"
+                >
+                  <img
+                    src={url}
+                    alt={`Existing cargo photo ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+
+                  {index === 0 && (
+                    <div className="absolute left-2 top-2 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-bold text-slate-950 shadow-sm">
+                      Main
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => removeExistingImage(url)}
+                    className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-bold text-white opacity-100 transition hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+
               {images.map((image, index) => (
                 <div
                   key={image.id}
@@ -329,7 +421,7 @@ function fillTestData() {
                     className="h-full w-full object-cover"
                   />
 
-                  {index === 0 && (
+                  {existingImageUrls.length === 0 && index === 0 && (
                     <div className="absolute left-2 top-2 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-bold text-slate-950 shadow-sm">
                       Main
                     </div>
@@ -360,6 +452,7 @@ function fillTestData() {
               type="number"
               step="0.01"
               min={0}
+              defaultValue={initialDraft?.length_m ?? ""}
               placeholder="12.5"
               className="ms-input mt-1"
             />
@@ -372,6 +465,7 @@ function fillTestData() {
               type="number"
               step="0.01"
               min={0}
+              defaultValue={initialDraft?.width_m ?? ""}
               placeholder="3.2"
               className="ms-input mt-1"
             />
@@ -384,6 +478,7 @@ function fillTestData() {
               type="number"
               step="0.01"
               min={0}
+              defaultValue={initialDraft?.height_m ?? ""}
               placeholder="4.1"
               className="ms-input mt-1"
             />
@@ -400,6 +495,7 @@ function fillTestData() {
             <input
               name="origin_city"
               type="text"
+              defaultValue={initialDraft?.origin_city || ""}
               placeholder="Riyadh"
               className="ms-input mt-1"
               required
@@ -411,6 +507,7 @@ function fillTestData() {
             <input
               name="destination_city"
               type="text"
+              defaultValue={initialDraft?.destination_city || ""}
               placeholder="Jeddah"
               className="ms-input mt-1"
               required
@@ -422,6 +519,7 @@ function fillTestData() {
             <input
               name="pickup_date"
               type="date"
+              defaultValue={initialDraft?.pickup_date || ""}
               className="ms-input mt-1 min-h-[52px] appearance-none text-slate-900"
               required
             />
@@ -429,7 +527,12 @@ function fillTestData() {
 
           <div>
             <label className="ms-label">Urgency</label>
-            <select name="urgency" className="ms-input mt-1" required>
+            <select
+              name="urgency"
+              defaultValue={initialDraft?.urgency || "normal"}
+              className="ms-input mt-1"
+              required
+            >
               <option value="normal">Normal</option>
               <option value="urgent">Urgent</option>
               <option value="flexible">Flexible</option>
@@ -443,6 +546,7 @@ function fillTestData() {
         <textarea
           name="description"
           rows={5}
+          defaultValue={initialDraft?.description || ""}
           placeholder="Describe loading requirements, access, special permits or additional details."
           className="ms-input mt-1 min-h-[130px]"
           required
@@ -460,6 +564,7 @@ function fillTestData() {
             <input
               name="contact_name"
               type="text"
+              defaultValue={initialDraft?.contact_name || ""}
               placeholder="Full name or company"
               className="ms-input mt-1"
               required
@@ -471,6 +576,7 @@ function fillTestData() {
             <input
               name="whatsapp_number"
               type="tel"
+              defaultValue={initialDraft?.whatsapp_number || ""}
               placeholder="+966 5x xxx xxxx"
               className="ms-input mt-1"
               required
@@ -494,7 +600,7 @@ function fillTestData() {
         </label>
       </section>
 
-      <SubmitButton submitting={submitting} />
+      <SubmitButton submitting={submitting} isEditing={isEditing} />
     </form>
   );
 }

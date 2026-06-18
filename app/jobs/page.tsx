@@ -38,7 +38,7 @@ export default async function JobsPage({
   let query = supabaseAdmin
     .from("transport_jobs")
     .select("*")
-    .eq("status", "approved")
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   if (origin) query = query.ilike("origin_city", `%${origin}%`);
@@ -64,7 +64,7 @@ if (weight === "30000+") {
 
   const subtitle = hasRouteFilter
     ? `Results for ${origin || "Anywhere"} → ${destination || "Anywhere"}`
-    : "All approved transport jobs";
+    : "All active transport jobs";
 
   const homeQuery = new URLSearchParams();
   if (origin) homeQuery.set("origin", origin);
