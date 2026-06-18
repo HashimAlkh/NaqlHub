@@ -75,7 +75,7 @@ export default async function JobDetailPage({
             <JobGallery images={images} title={job.title}>
               <Link
                 href="/jobs"
-                className="absolute left-5 top-5 z-20 inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
+                className="absolute left-5 top-5 z-40 inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
               >
                 ← Back to jobs
               </Link>
@@ -108,7 +108,7 @@ export default async function JobDetailPage({
             </JobGallery>
 
             {/* Mobile title panel */}
-            <div className="relative z-20 -mt-8 mx-4 rounded-t-[2rem] bg-white px-5 pb-4 pt-6 md:hidden">
+            <div className="relative z-20 -mt-8 mx-1 rounded-t-[2rem] bg-white px-5 pb-4 pt-6 md:hidden">
               <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-slate-950">
                 {job.title}
               </h1>
