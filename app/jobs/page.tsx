@@ -4,6 +4,7 @@ import JobCard from "@/app/components/JobCard";
 import Link from "next/link";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
+import JobAlertDialog from "@/app/components/JobAlertDialog";
 import {
   Search,
   MapPin,
@@ -83,6 +84,10 @@ if (weight === "30000+") {
   if (weight) homeQuery.set("weight", weight);
   
   const homeSearchHref = homeQuery.toString() ? `/?${homeQuery}` : "/";
+  const currentSearchHref = homeQuery.toString()
+    ? `/jobs?${homeQuery}`
+    : "/jobs";
+  const hasAlertFilters = Boolean(origin || destination || cargoType || vehicleType);
 
   return (
     <main className="min-h-screen bg-[#f2f3f5] text-slate-900">
@@ -157,6 +162,20 @@ if (weight === "30000+") {
             />
           </div>
         </div>
+
+        {hasAlertFilters && (
+          <div className="mb-7">
+            <JobAlertDialog
+              initialFilters={{
+                origin_city: origin,
+                destination_city: destination,
+                cargo_type: cargoType,
+                vehicle_type: vehicleType,
+              }}
+              returnTo={currentSearchHref}
+            />
+          </div>
+        )}
 
 
 

@@ -52,10 +52,14 @@ export default async function SiteHeader({ sticky }: SiteHeaderProps) {
 
         <nav className="flex items-center gap-4 text-sm md:gap-8">
           <Link
-            href="/jobs"
+            href={
+              user
+                ? "/dashboard/job-alerts"
+                : "/login?next=/dashboard/job-alerts"
+            }
             className="font-medium text-slate-600 transition hover:text-slate-900"
           >
-            Find Jobs
+            Job Alerts
           </Link>
 
           <Link

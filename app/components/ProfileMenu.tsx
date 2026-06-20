@@ -48,7 +48,8 @@ export default function ProfileMenu({
         <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-xl">
           <MenuLink href="/dashboard" label="Dashboard" />
           <MenuLink href="/dashboard/jobs" label="My Jobs" />
-          <MenuLink href="/dashboard/liked-jobs" label="Liked Jobs" />
+          <MenuLink href="/dashboard/liked-jobs" label="Saved Jobs" />
+          <MenuLink href="/dashboard/job-alerts" label="Job Alerts" />
           <MenuLink href="/dashboard/profile" label="Profile" />
 
           <div className="my-2 h-px bg-slate-100" />

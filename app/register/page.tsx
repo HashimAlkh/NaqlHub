@@ -78,6 +78,19 @@ export default async function RegisterPage({
             </div>
 
             <div>
+              <label className="ms-label" htmlFor="company_name">
+                Company name <span className="font-medium text-slate-400">(optional)</span>
+              </label>
+              <input
+                id="company_name"
+                name="company_name"
+                type="text"
+                autoComplete="organization"
+                className="ms-input mt-1"
+              />
+            </div>
+
+            <div>
               <label className="ms-label" htmlFor="email">
                 Email
               </label>

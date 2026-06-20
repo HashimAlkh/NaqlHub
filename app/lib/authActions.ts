@@ -48,6 +48,7 @@ export async function registerWithPassword(formData: FormData) {
   const password = cleanString(formData.get("password"));
   const fullName = cleanString(formData.get("full_name"));
   const phone = cleanString(formData.get("phone"));
+  const companyName = cleanString(formData.get("company_name"));
 
   if (!fullName) {
     authErrorRedirect("/register", "Full name is required.");
@@ -69,6 +70,7 @@ export async function registerWithPassword(formData: FormData) {
       data: {
         full_name: fullName,
         phone,
+        company_name: companyName || null,
         role: "shipper",
       },
     },
@@ -85,6 +87,7 @@ export async function registerWithPassword(formData: FormData) {
     email,
     full_name: fullName,
     phone,
+    company_name: companyName || null,
     role: "shipper",
   });
 

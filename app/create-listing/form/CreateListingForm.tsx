@@ -1,6 +1,15 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  KeyboardEvent,
+  ReactNode,
+  useMemo,
+  useState,
+} from "react";
+import { ChevronDown, MapPin } from "lucide-react";
+import { SAUDI_CITIES } from "@/app/lib/saudiCities";
 import { createTransportJob, updateTransportJob } from "./actions";
 
 export type TransportJobFormInitialValues = {
@@ -23,15 +32,172 @@ export type TransportJobFormInitialValues = {
   image_urls?: string[] | null;
 };
 
+export type TransportJobContactDefaults = {
+  contact_name?: string | null;
+  whatsapp_number?: string | null;
+};
+
 const MAX_IMAGES = 5;
 const MAX_IMAGE_WIDTH = 1600;
 const IMAGE_QUALITY = 0.78;
-
 type SelectedImage = {
   id: string;
   file: File;
   previewUrl: string;
 };
+
+const selectClassName =
+  "mt-1 h-11 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-11 text-slate-900 shadow-sm outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100";
+
+function StyledSelect({
+  children,
+  defaultValue,
+  name,
+  required = false,
+}: {
+  children: ReactNode;
+  defaultValue: string;
+  name: string;
+  required?: boolean;
+}) {
+  return (
+    <div className="relative">
+      <select
+        name={name}
+        defaultValue={defaultValue}
+        className={selectClassName}
+        required={required}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        aria-hidden="true"
+        className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500"
+      />
+    </div>
+  );
+}
+
+function CityAutocomplete({
+  defaultValue,
+  name,
+  placeholder,
+}: {
+  defaultValue: string;
+  name: string;
+  placeholder: string;
+}) {
+  const [value, setValue] = useState(defaultValue);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const suggestions = useMemo(() => {
+    const query = value.trim().toLocaleLowerCase();
+    if (!query) return [];
+
+    return SAUDI_CITIES.filter((city) =>
+      city.toLocaleLowerCase().includes(query)
+    ).slice(0, 5);
+  }, [value]);
+
+  function selectCity(city: string) {
+    setValue(city);
+    setActiveIndex(-1);
+    setIsOpen(false);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      setIsOpen(false);
+      return;
+    }
+
+    if (!suggestions.length) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex((current) => (current + 1) % suggestions.length);
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      setActiveIndex(
+        (current) =>
+          current <= 0 ? suggestions.length - 1 : current - 1
+      );
+    }
+
+    if (event.key === "Enter" && activeIndex >= 0) {
+      event.preventDefault();
+      selectCity(suggestions[activeIndex]);
+    }
+  }
+
+  return (
+    <div className="relative">
+      <MapPin
+        aria-hidden="true"
+        className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400"
+      />
+      <input
+        name={name}
+        type="text"
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => {
+          setValue(event.target.value);
+          setActiveIndex(-1);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => setIsOpen(false)}
+        onKeyDown={handleKeyDown}
+        role="combobox"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
+        aria-controls={`${name}-suggestions`}
+        aria-expanded={isOpen && suggestions.length > 0}
+        aria-activedescendant={
+          activeIndex >= 0 ? `${name}-suggestion-${activeIndex}` : undefined
+        }
+        className="mt-1 h-12 w-full rounded-2xl border border-slate-200 bg-white py-2 pl-11 pr-4 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+        required
+      />
+
+      {isOpen && suggestions.length > 0 && (
+        <ul
+          id={`${name}-suggestions`}
+          role="listbox"
+          className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-lg"
+        >
+          {suggestions.map((city, index) => (
+            <li
+              key={city}
+              id={`${name}-suggestion-${index}`}
+              role="option"
+              aria-selected={index === activeIndex}
+            >
+              <button
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  selectCity(city);
+                }}
+                className={`flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-amber-50 ${
+                  index === activeIndex ? "bg-amber-50" : ""
+                }`}
+              >
+                <MapPin className="h-4 w-4 shrink-0 text-amber-500" />
+                {city}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 async function compressImage(file: File): Promise<File> {
   if (!file.type.startsWith("image/")) {
@@ -104,8 +270,10 @@ function SubmitButton({
 
 export default function CreateListingForm({
   initialDraft,
+  contactDefaults,
 }: {
   initialDraft?: TransportJobFormInitialValues | null;
+  contactDefaults?: TransportJobContactDefaults | null;
   mode?: string;
   readonly?: boolean;
   manageToken?: string;
@@ -284,10 +452,9 @@ function fillTestData() {
 
           <div>
             <label className="ms-label">Cargo type</label>
-            <select
+            <StyledSelect
               name="cargo_type"
               defaultValue={initialDraft?.cargo_type || ""}
-              className="ms-input mt-1"
               required
             >
               <option value="">Select cargo type</option>
@@ -299,15 +466,14 @@ function fillTestData() {
               </option>
               <option value="containers">Containers</option>
               <option value="other">Other</option>
-            </select>
+            </StyledSelect>
           </div>
 
           <div>
             <label className="ms-label">Required vehicle</label>
-            <select
+            <StyledSelect
               name="vehicle_type"
               defaultValue={initialDraft?.vehicle_type || ""}
-              className="ms-input mt-1"
               required
             >
               <option value="">Select vehicle type</option>
@@ -317,7 +483,7 @@ function fillTestData() {
               <option value="crane_truck">Crane truck</option>
               <option value="container_truck">Container truck</option>
               <option value="not_sure">Not sure</option>
-            </select>
+            </StyledSelect>
           </div>
 
           <div>
@@ -492,25 +658,19 @@ function fillTestData() {
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
             <label className="ms-label">Origin city</label>
-            <input
+            <CityAutocomplete
               name="origin_city"
-              type="text"
               defaultValue={initialDraft?.origin_city || ""}
               placeholder="Riyadh"
-              className="ms-input mt-1"
-              required
             />
           </div>
 
           <div>
             <label className="ms-label">Destination city</label>
-            <input
+            <CityAutocomplete
               name="destination_city"
-              type="text"
               defaultValue={initialDraft?.destination_city || ""}
               placeholder="Jeddah"
-              className="ms-input mt-1"
-              required
             />
           </div>
 
@@ -527,16 +687,15 @@ function fillTestData() {
 
           <div>
             <label className="ms-label">Urgency</label>
-            <select
+            <StyledSelect
               name="urgency"
               defaultValue={initialDraft?.urgency || "normal"}
-              className="ms-input mt-1"
               required
             >
               <option value="normal">Normal</option>
               <option value="urgent">Urgent</option>
               <option value="flexible">Flexible</option>
-            </select>
+            </StyledSelect>
           </div>
         </div>
       </section>
@@ -564,7 +723,11 @@ function fillTestData() {
             <input
               name="contact_name"
               type="text"
-              defaultValue={initialDraft?.contact_name || ""}
+              defaultValue={
+                isEditing
+                  ? initialDraft?.contact_name || ""
+                  : contactDefaults?.contact_name || ""
+              }
               placeholder="Full name or company"
               className="ms-input mt-1"
               required
@@ -576,7 +739,11 @@ function fillTestData() {
             <input
               name="whatsapp_number"
               type="tel"
-              defaultValue={initialDraft?.whatsapp_number || ""}
+              defaultValue={
+                isEditing
+                  ? initialDraft?.whatsapp_number || ""
+                  : contactDefaults?.whatsapp_number || ""
+              }
               placeholder="+966 5x xxx xxxx"
               className="ms-input mt-1"
               required

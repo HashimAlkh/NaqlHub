@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BriefcaseBusiness, LogOut, PlusCircle } from "lucide-react";
+import { Bell, BriefcaseBusiness, LogOut, PlusCircle } from "lucide-react";
+import JobAlertDialog from "@/app/components/JobAlertDialog";
 import SiteHeader from "@/app/components/SiteHeader";
 import { requireUser } from "@/app/lib/auth";
 import { logout } from "@/app/lib/authActions";
@@ -83,6 +84,43 @@ export default async function DashboardPage() {
             </p>
           </Link>
         </div>
+
+        <section className="mt-6 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-slate-950">
+                <Bell className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-950">
+                  Job Alerts
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-700">
+                  Get notified when matching transport jobs are posted.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <JobAlertDialog
+                initialFilters={{
+                  origin_city: "",
+                  destination_city: "",
+                  cargo_type: "",
+                  vehicle_type: "",
+                }}
+                returnTo="/dashboard/job-alerts"
+                triggerLabel="Create Alert"
+              />
+              <Link
+                href="/dashboard/job-alerts"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-amber-300 bg-white px-5 text-sm font-extrabold text-slate-800 transition hover:bg-amber-100"
+              >
+                Manage Alerts
+              </Link>
+            </div>
+          </div>
+        </section>
       </section>
     </main>
   );

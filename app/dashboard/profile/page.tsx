@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { Building2, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import SiteHeader from "@/app/components/SiteHeader";
 import { requireUser } from "@/app/lib/auth";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
@@ -11,7 +11,7 @@ export default async function DashboardProfilePage() {
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
-    .select("full_name, email, phone, role")
+    .select("full_name, email, phone, company_name, role")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -54,6 +54,11 @@ export default async function DashboardProfilePage() {
               icon={<Phone className="h-5 w-5" />}
               label="Phone"
               value={profile?.phone || "Not set"}
+            />
+            <ProfileField
+              icon={<Building2 className="h-5 w-5" />}
+              label="Company name"
+              value={profile?.company_name || "Not provided"}
             />
             <ProfileField
               icon={<ShieldCheck className="h-5 w-5" />}

@@ -15,6 +15,7 @@ import JobGallery from "@/app/components/JobGallery";
 import FavoriteButton from "@/app/components/FavoriteButton";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
+import { formatWeight } from "@/app/lib/jobFormatters";
 
 function formatValue(value: string | null | undefined) {
   if (!value) return "Not specified";
@@ -143,7 +144,7 @@ export default async function JobDetailPage({
               <FactItem
                 icon={<Weight className="h-5 w-5" />}
                 label="Weight"
-                value={`${Number(job.weight_kg || 0).toLocaleString()} kg`}
+                value={formatWeight(job.weight_kg)}
               />
 
               <FactItem

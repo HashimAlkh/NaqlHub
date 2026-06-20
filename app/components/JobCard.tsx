@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, Package, Truck, Calendar } from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
+import { formatWeight } from "@/app/lib/jobFormatters";
 
 export type JobCardJob = {
   id: string;
@@ -126,9 +127,7 @@ export default function JobCard({
       <Package className="h-3.5 w-3.5 shrink-0 text-slate-500" />
 
       <span className="truncate">
-                {job.weight_kg
-                  ? `${Number(job.weight_kg).toLocaleString()} kg`
-                  : "Weight not set"}
+                {formatWeight(job.weight_kg)}
               </span>
             </span>
 
