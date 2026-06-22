@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Calendar, MapPin, Package, Weight } from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
 import { formatWeight } from "@/app/lib/jobFormatters";
+import { getTranslations, type Locale } from "@/app/i18n";
 
 export type JobCardJob = {
   id: string;
@@ -17,18 +18,18 @@ export type JobCardJob = {
   image_urls: string[] | null;
 };
 
-function formatValue(value: string | null | undefined) {
-  if (!value) return "Not specified";
+function formatValue(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
   return value.replaceAll("_", " ");
 }
 
-function formatDate(value: string | null | undefined) {
-  if (!value) return "Pickup date not set";
+function formatDate(value: string | null | undefined, locale: Locale, fallback: string) {
+  if (!value) return fallback;
 
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
 
-  return date.toLocaleDateString("en-GB", {
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -42,27 +43,40 @@ const urgencyConfig: Record<string, { label: string; className: string }> = {
   normal: { label: "NORMAL", className: "bg-slate-100 text-slate-600" },
 };
 
-const vehicleLabels: Record<string, string> = {
-  lowbed_trailer: "Lowbed",
-  flatbed_trailer: "Flatbed",
-  extendable_trailer: "Extendable",
+const vehicleLabelKeys: Record<string, "lowbed" | "flatbed" | "extendable"> = {
+  lowbed_trailer: "lowbed",
+  flatbed_trailer: "flatbed",
+  extendable_trailer: "extendable",
 };
 
-const cargoLabels: Record<string, string> = {
-  heavy_equipment: "Heavy Equipment",
-  industrial_cargo: "Industrial",
-  oversized_load: "Oversized",
-  construction_materials: "Construction",
+const cargoLabelKeys: Record<
+  string,
+  "heavyEquipment" | "industrial" | "oversized" | "construction"
+> = {
+  heavy_equipment: "heavyEquipment",
+  industrial_cargo: "industrial",
+  oversized_load: "oversized",
+  construction_materials: "construction",
 };
 
-function formatVehicle(value: string | null | undefined) {
-  if (!value) return "Not specified";
-  return vehicleLabels[value] || formatValue(value);
+function formatVehicle(
+  value: string | null | undefined,
+  fallback: string,
+  labels: ReturnType<typeof getTranslations>["types"]
+) {
+  if (!value) return fallback;
+  const key = vehicleLabelKeys[value];
+  return key ? labels[key] : formatValue(value, fallback);
 }
 
-function formatCargo(value: string | null | undefined) {
-  if (!value) return "Not specified";
-  return cargoLabels[value] || formatValue(value);
+function formatCargo(
+  value: string | null | undefined,
+  fallback: string,
+  labels: ReturnType<typeof getTranslations>["types"]
+) {
+  if (!value) return fallback;
+  const key = cargoLabelKeys[value];
+  return key ? labels[key] : formatValue(value, fallback);
 }
 
 function TrailerIcon({ className = "" }: { className?: string }) {
@@ -89,12 +103,22 @@ function TrailerIcon({ className = "" }: { className?: string }) {
 export default function JobCard({
   job,
   isFavorited = false,
+  locale = "en",
 }: {
   job: JobCardJob;
   isFavorited?: boolean;
+  locale?: Locale;
 }) {
+  const t = getTranslations(locale);
   const tag = (job.urgency || "new").toLowerCase();
-  const { label, className } = urgencyConfig[tag] ?? urgencyConfig.normal;
+  const urgencyLabels: Record<string, string> = {
+    urgent: t.types.urgent,
+    hot: t.types.urgent,
+    new: t.types.new,
+    normal: t.types.normal,
+  };
+  const { className } = urgencyConfig[tag] ?? urgencyConfig.normal;
+  const label = urgencyLabels[tag] ?? urgencyLabels.normal;
 
   return (
     <article className="group relative flex h-[400px] flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
@@ -134,7 +158,7 @@ export default function JobCard({
         <div className="absolute bottom-8 right-4 z-10 rounded-full bg-white/95 px-2.5 py-1 text-sm font-extrabold text-slate-900 shadow-md backdrop-blur">
           {job.budget_sar
             ? `SAR ${Number(job.budget_sar).toLocaleString("en-US")}`
-            : "Open"}
+            : t.common.open}
         </div>
       </div>
 
@@ -145,7 +169,7 @@ export default function JobCard({
 
         <div className=" flex items-center gap-2 text-sm font-semibold text-slate-500">
           <Calendar className="h-4 w-4 shrink-0 text-slate-500" />
-          {formatDate(job.pickup_date)}
+          {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
         </div>
 
         <div className="mt-2 mb-3 flex h-[28px] items-center gap-3 text-sm font-bold text-slate-900">
@@ -166,17 +190,17 @@ export default function JobCard({
           <div className="grid min-h-12 grid-cols-3 divide-x divide-slate-100 text-[11px] font-semibold leading-4 text-slate-700">
             <span className="flex min-w-0 items-center justify-center gap-1.5 pr-2 pb-2">
               <TrailerIcon className="h-4 w-4 shrink-1 text-slate-600" />
-              <span className="min-w-0 break-words">{formatVehicle(job.vehicle_type)}</span>
+              <span className="min-w-0 break-words">{formatVehicle(job.vehicle_type, t.common.notSpecified, t.types)}</span>
             </span>
 
             <span className="flex min-w-0 items-center justify-center gap-1.5 px-1 pb-2">
               <Weight className="h-4 w-4 shrink-1 text-slate-500" />
-              <span className="min-w-0 break-words">{formatWeight(job.weight_kg)}</span>
+              <span className="min-w-0 break-words">{formatWeight(job.weight_kg, t.jobs.weightNotSet)}</span>
             </span>
 
             <span className="flex min-w-0 items-center justify-center gap-1.5 pl-2 pb-2">
               <Package className="h-4 w-4 shrink-1 text-slate-500" />
-              <span className="min-w-0 break-words">{formatCargo(job.cargo_type)}</span>
+              <span className="min-w-0 break-words">{formatCargo(job.cargo_type, t.common.notSpecified, t.types)}</span>
             </span>
           </div>
         </div>

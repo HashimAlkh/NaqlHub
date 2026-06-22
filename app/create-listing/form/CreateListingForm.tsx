@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ChevronDown, MapPin } from "lucide-react";
 import { SAUDI_CITIES } from "@/app/lib/saudiCities";
+import { getTranslations, type Locale } from "@/app/i18n";
 import { createTransportJob, updateTransportJob } from "./actions";
 
 export type TransportJobFormInitialValues = {
@@ -247,9 +248,11 @@ async function compressImage(file: File): Promise<File> {
 function SubmitButton({
   submitting,
   isEditing,
+  labels,
 }: {
   submitting: boolean;
   isEditing: boolean;
+  labels: ReturnType<typeof getTranslations>["form"];
 }) {
   return (
     <button
@@ -259,11 +262,11 @@ function SubmitButton({
     >
       {submitting
         ? isEditing
-          ? "Saving changes..."
-          : "Submitting job..."
+          ? labels.savingChanges
+          : labels.submitting
         : isEditing
-          ? "Save Changes"
-          : "Submit Transport Job"}
+          ? labels.saveChanges
+          : labels.submit}
     </button>
   );
 }
@@ -271,13 +274,17 @@ function SubmitButton({
 export default function CreateListingForm({
   initialDraft,
   contactDefaults,
+  locale = "en",
 }: {
   initialDraft?: TransportJobFormInitialValues | null;
   contactDefaults?: TransportJobContactDefaults | null;
+  locale?: Locale;
   mode?: string;
   readonly?: boolean;
   manageToken?: string;
 }) {
+  const translations = getTranslations(locale);
+  const t = translations.form;
   const isEditing = Boolean(initialDraft?.id);
   const [submitting, setSubmitting] = useState(false);
   const [images, setImages] = useState<SelectedImage[]>([]);
@@ -314,7 +321,7 @@ export default function CreateListingForm({
       alert(
         error instanceof Error
           ? error.message
-          : "One or more images could not be processed."
+          : t.imageProcessError
       );
     } finally {
       e.target.value = "";
@@ -355,7 +362,7 @@ export default function CreateListingForm({
       alert(
         error instanceof Error
           ? error.message
-          : "Transport job could not be saved."
+          : t.saveError
       );
       setSubmitting(false);
     }
@@ -435,59 +442,59 @@ function fillTestData() {
       />
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-900">Cargo details</h2>
+        <h2 className="text-lg font-semibold text-slate-900">{t.cargoDetails}</h2>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="ms-label">Job title</label>
+            <label className="ms-label">{t.jobTitle}</label>
             <input
               name="title"
               type="text"
               defaultValue={initialDraft?.title || ""}
-              placeholder="e.g. Transport excavator from Riyadh to Jeddah"
+              placeholder={t.jobTitlePlaceholder}
               className="ms-input mt-1"
               required
             />
           </div>
 
           <div>
-            <label className="ms-label">Cargo type</label>
+            <label className="ms-label">{t.cargoType}</label>
             <StyledSelect
               name="cargo_type"
               defaultValue={initialDraft?.cargo_type || ""}
               required
             >
-              <option value="">Select cargo type</option>
-              <option value="heavy_equipment">Heavy equipment</option>
-              <option value="industrial_cargo">Industrial cargo</option>
-              <option value="oversized_load">Oversized load</option>
+              <option value="">{t.selectCargo}</option>
+              <option value="heavy_equipment">{translations.types.heavyEquipment}</option>
+              <option value="industrial_cargo">{translations.types.industrial}</option>
+              <option value="oversized_load">{translations.types.oversized}</option>
               <option value="construction_materials">
-                Construction materials
+                {translations.types.construction}
               </option>
-              <option value="containers">Containers</option>
-              <option value="other">Other</option>
+              <option value="containers">{translations.alerts.containers}</option>
+              <option value="other">{translations.alerts.other}</option>
             </StyledSelect>
           </div>
 
           <div>
-            <label className="ms-label">Required vehicle</label>
+            <label className="ms-label">{t.requiredVehicle}</label>
             <StyledSelect
               name="vehicle_type"
               defaultValue={initialDraft?.vehicle_type || ""}
               required
             >
-              <option value="">Select vehicle type</option>
-              <option value="lowbed_trailer">Lowbed trailer</option>
-              <option value="flatbed_trailer">Flatbed trailer</option>
-              <option value="extendable_trailer">Extendable trailer</option>
-              <option value="crane_truck">Crane truck</option>
-              <option value="container_truck">Container truck</option>
-              <option value="not_sure">Not sure</option>
+              <option value="">{t.selectVehicle}</option>
+              <option value="lowbed_trailer">{translations.types.lowbed}</option>
+              <option value="flatbed_trailer">{translations.types.flatbed}</option>
+              <option value="extendable_trailer">{translations.types.extendable}</option>
+              <option value="crane_truck">{translations.types.craneTruck}</option>
+              <option value="container_truck">{translations.types.containerTruck}</option>
+              <option value="not_sure">{translations.alerts.notSure}</option>
             </StyledSelect>
           </div>
 
           <div>
-            <label className="ms-label">Weight (t)</label>
+            <label className="ms-label">{t.weight}</label>
             <input
               name="weight_kg"
               type="number"
@@ -505,7 +512,7 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Budget (SAR, optional)</label>
+            <label className="ms-label">{t.budget}</label>
             <input
               name="budget_sar"
               type="number"
@@ -521,9 +528,9 @@ function fillTestData() {
       <section>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Photos</h2>
+            <h2 className="text-lg font-semibold text-slate-900">{t.photos}</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Add up to {MAX_IMAGES} photos of the cargo, equipment or loading situation.
+              {t.photosDescription}
             </p>
           </div>
 
@@ -545,10 +552,10 @@ function fillTestData() {
             />
 
             <span className="text-sm font-semibold text-slate-900">
-              Upload cargo photos
+              {t.uploadPhotos}
             </span>
             <span className="mt-1 text-xs text-slate-500">
-              JPG, PNG or HEIC. Images are compressed before upload.
+              {t.uploadHint}
             </span>
           </label>
 
@@ -567,7 +574,7 @@ function fillTestData() {
 
                   {index === 0 && (
                     <div className="absolute left-2 top-2 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-bold text-slate-950 shadow-sm">
-                      Main
+                      {t.main}
                     </div>
                   )}
 
@@ -576,7 +583,7 @@ function fillTestData() {
                     onClick={() => removeExistingImage(url)}
                     className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-bold text-white opacity-100 transition hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100"
                   >
-                    Remove
+                    {t.remove}
                   </button>
                 </div>
               ))}
@@ -594,7 +601,7 @@ function fillTestData() {
 
                   {existingImageUrls.length === 0 && index === 0 && (
                     <div className="absolute left-2 top-2 rounded-full bg-amber-400 px-2 py-1 text-[10px] font-bold text-slate-950 shadow-sm">
-                      Main
+                      {t.main}
                     </div>
                   )}
 
@@ -603,7 +610,7 @@ function fillTestData() {
                     onClick={() => removeImage(image.id)}
                     className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs font-bold text-white opacity-100 transition hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100"
                   >
-                    Remove
+                    {t.remove}
                   </button>
                 </div>
               ))}
@@ -613,11 +620,11 @@ function fillTestData() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-900">Dimensions</h2>
+        <h2 className="text-lg font-semibold text-slate-900">{t.dimensions}</h2>
 
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <div>
-            <label className="ms-label">Length (m)</label>
+            <label className="ms-label">{t.length}</label>
             <input
               name="length_m"
               type="number"
@@ -630,7 +637,7 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Width (m)</label>
+            <label className="ms-label">{t.width}</label>
             <input
               name="width_m"
               type="number"
@@ -643,7 +650,7 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Height (m)</label>
+            <label className="ms-label">{t.height}</label>
             <input
               name="height_m"
               type="number"
@@ -658,11 +665,11 @@ function fillTestData() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-900">Route</h2>
+        <h2 className="text-lg font-semibold text-slate-900">{t.route}</h2>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="ms-label">Origin city</label>
+            <label className="ms-label">{t.origin}</label>
             <CityAutocomplete
               name="origin_city"
               defaultValue={initialDraft?.origin_city || ""}
@@ -671,7 +678,7 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Destination city</label>
+            <label className="ms-label">{t.destination}</label>
             <CityAutocomplete
               name="destination_city"
               defaultValue={initialDraft?.destination_city || ""}
@@ -680,7 +687,7 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Pickup date</label>
+            <label className="ms-label">{t.pickupDate}</label>
             <input
               name="pickup_date"
               type="date"
@@ -691,27 +698,27 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Urgency</label>
+            <label className="ms-label">{t.urgency}</label>
             <StyledSelect
               name="urgency"
               defaultValue={initialDraft?.urgency || "normal"}
               required
             >
-              <option value="normal">Normal</option>
-              <option value="urgent">Urgent</option>
-              <option value="flexible">Flexible</option>
+              <option value="normal">{translations.types.normal}</option>
+              <option value="urgent">{translations.types.urgent}</option>
+              <option value="flexible">{translations.types.flexible}</option>
             </StyledSelect>
           </div>
         </div>
       </section>
 
       <section>
-        <label className="ms-label">Job description</label>
+        <label className="ms-label">{t.description}</label>
         <textarea
           name="description"
           rows={5}
           defaultValue={initialDraft?.description || ""}
-          placeholder="Describe loading requirements, access, special permits or additional details."
+          placeholder={t.descriptionPlaceholder}
           className="ms-input mt-1 min-h-[130px]"
           required
         />
@@ -719,12 +726,12 @@ function fillTestData() {
 
       <section>
         <h2 className="text-lg font-semibold text-slate-900">
-          Contact details
+          {t.contactDetails}
         </h2>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="ms-label">Contact name</label>
+            <label className="ms-label">{t.contactName}</label>
             <input
               name="contact_name"
               type="text"
@@ -733,14 +740,14 @@ function fillTestData() {
                   ? initialDraft?.contact_name || ""
                   : contactDefaults?.contact_name || ""
               }
-              placeholder="Full name or company"
+              placeholder={t.contactNamePlaceholder}
               className="ms-input mt-1"
               required
             />
           </div>
 
           <div>
-            <label className="ms-label">WhatsApp number</label>
+            <label className="ms-label">{t.whatsapp}</label>
             <input
               name="whatsapp_number"
               type="tel"
@@ -766,13 +773,12 @@ function fillTestData() {
             className="mt-1 h-4 w-4 rounded border-slate-300 text-amber-500 focus:ring-amber-400"
           />
           <span>
-            I confirm that the information is accurate and that NaqlHub may
-            review this job before publication.
+            {t.legal}
           </span>
         </label>
       </section>
 
-      <SubmitButton submitting={submitting} isEditing={isEditing} />
+      <SubmitButton submitting={submitting} isEditing={isEditing} labels={t} />
     </form>
   );
 }

@@ -3,11 +3,14 @@ import { Building2, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import SiteHeader from "@/app/components/SiteHeader";
 import { requireUser } from "@/app/lib/auth";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardProfilePage() {
   const user = await requireUser("/login?next=/dashboard/profile");
+  const t = getTranslations(await getLocale());
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
@@ -24,45 +27,45 @@ export default async function DashboardProfilePage() {
           href="/dashboard"
           className="text-sm font-bold text-amber-600 hover:text-amber-700"
         >
-          Back to dashboard
+          {t.common.backToDashboard}
         </Link>
 
         <div className="mt-4 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <div className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            Profile
+            {t.profile.label}
           </div>
 
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">
-            Account details
+            {t.profile.title}
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Your NaqlHub shipper profile information.
+            {t.profile.description}
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <ProfileField
               icon={<UserRound className="h-5 w-5" />}
-              label="Full name"
-              value={profile?.full_name || "Not set"}
+              label={t.profile.fullName}
+              value={profile?.full_name || t.common.notSet}
             />
             <ProfileField
               icon={<Mail className="h-5 w-5" />}
-              label="Email"
-              value={profile?.email || user.email || "Not set"}
+              label={t.profile.email}
+              value={profile?.email || user.email || t.common.notSet}
             />
             <ProfileField
               icon={<Phone className="h-5 w-5" />}
-              label="Phone"
-              value={profile?.phone || "Not set"}
+              label={t.profile.phone}
+              value={profile?.phone || t.common.notSet}
             />
             <ProfileField
               icon={<Building2 className="h-5 w-5" />}
-              label="Company name"
-              value={profile?.company_name || "Not provided"}
+              label={t.profile.companyName}
+              value={profile?.company_name || t.common.notProvided}
             />
             <ProfileField
               icon={<ShieldCheck className="h-5 w-5" />}
-              label="Role"
+              label={t.profile.role}
               value={profile?.role || "shipper"}
             />
           </div>

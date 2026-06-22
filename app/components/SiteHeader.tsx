@@ -82,6 +82,7 @@ export default async function SiteHeader({ sticky }: SiteHeaderProps) {
             <ProfileMenu
               align={locale === "ar" ? "left" : "right"}
               initials={initials}
+              locale={locale}
             />
           ) : (
             <Link

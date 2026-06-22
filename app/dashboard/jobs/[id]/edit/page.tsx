@@ -6,6 +6,8 @@ import CreateListingForm, {
 } from "@/app/create-listing/form/CreateListingForm";
 import { requireUser } from "@/app/lib/auth";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import { getLocale } from "@/app/lib/locale";
+import { getTranslations } from "@/app/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,8 @@ export default async function EditJobPage({
   params: Promise<{ id: string }>;
 }) {
   const user = await requireUser("/login?next=/dashboard/jobs");
+  const locale = await getLocale();
+  const t = getTranslations(locale).form;
   const { id } = await params;
 
   const { data: job } = await supabaseAdmin
@@ -37,20 +41,21 @@ export default async function EditJobPage({
           href="/dashboard/jobs"
           className="text-sm font-bold text-amber-600 hover:text-amber-700"
         >
-          Back to My Jobs
+          {t.backToMyJobs}
         </Link>
 
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">
-          Edit Transport Job
+          {t.editTitle}
         </h1>
 
         <p className="mt-2 text-sm text-slate-600">
-          Update cargo, route, vehicle requirements and contact details.
+          {t.editDescription}
         </p>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
           <CreateListingForm
             initialDraft={job as TransportJobFormInitialValues}
+            locale={locale}
           />
         </div>
       </section>

@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
-export default function SiteFooter() {
+export default async function SiteFooter() {
+  const t = getTranslations(await getLocale()).footer;
+
   return (
     <footer className="border-t border-slate-200 bg-white">
       <div className="mx-auto max-w-7xl px-6 py-10">
@@ -13,28 +17,27 @@ export default function SiteFooter() {
             </div>
 
             <p className="mt-3 max-w-sm text-sm text-slate-600">
-              Saudi Arabia&apos;s marketplace for heavy transport,
-              oversized cargo and industrial logistics.
+              {t.description}
             </p>
           </div>
 
           {/* Platform */}
           <div>
             <h3 className="mb-3 text-sm font-semibold text-slate-900">
-              Platform
+              {t.platform}
             </h3>
 
             <div className="flex flex-col gap-2 text-sm text-slate-600">
               <Link href="/jobs" className="hover:text-slate-900">
-                Browse Jobs
+                {t.browseJobs}
               </Link>
 
               <Link href="/create-listing" className="hover:text-slate-900">
-                Post a Job
+                {t.jobAlerts}
               </Link>
 
               <Link href="/alerts" className="hover:text-slate-900">
-                Job Alerts
+                {t.postJob}
               </Link>
             </div>
           </div>
@@ -42,20 +45,20 @@ export default function SiteFooter() {
           {/* Legal */}
           <div>
             <h3 className="mb-3 text-sm font-semibold text-slate-900">
-              Legal
+              {t.legal}
             </h3>
 
             <div className="flex flex-col gap-2 text-sm text-slate-600">
               <Link href="/impressum" className="hover:text-slate-900">
-                Impressum
+                {t.legalNotice}
               </Link>
 
               <Link href="/datenschutz" className="hover:text-slate-900">
-                Datenschutz
+                {t.privacy}
               </Link>
 
               <Link href="/agb" className="hover:text-slate-900">
-                Terms & Conditions
+                {t.terms}
               </Link>
             </div>
           </div>
@@ -63,7 +66,7 @@ export default function SiteFooter() {
       </div>
 
       <div className="border-t border-slate-100 py-4 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} NaqlHub. All rights reserved.
+        © {new Date().getFullYear()} NaqlHub. {t.rights}
       </div>
     </footer>
   );

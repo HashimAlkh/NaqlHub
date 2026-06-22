@@ -4,11 +4,15 @@ import SiteHeader from "@/app/components/SiteHeader";
 import { requireUser } from "@/app/lib/auth";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import JobCard, { type JobCardJob } from "@/app/components/JobCard";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function LikedJobsPage() {
   const user = await requireUser("/login?next=/dashboard/liked-jobs");
+  const locale = await getLocale();
+  const t = getTranslations(locale);
 
   const { data: favorites } = await supabaseAdmin
     .from("job_favorites")
@@ -44,16 +48,16 @@ export default async function LikedJobsPage() {
           href="/dashboard"
           className="text-sm font-bold text-amber-600 hover:text-amber-700"
         >
-          Back to dashboard
+          {t.common.backToDashboard}
         </Link>
 
         <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">
-            Liked Jobs
+            {t.liked.title}
             </h1>
             <p className="mt-2 text-sm text-slate-600">
-              Saved transport jobs from your account.
+              {t.liked.description}
             </p>
           </div>
 
@@ -61,14 +65,14 @@ export default async function LikedJobsPage() {
             href="/jobs"
             className="inline-flex h-11 items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300"
           >
-            Find Jobs
+            {t.common.browseJobs}
           </Link>
         </div>
 
         {orderedJobs.length > 0 ? (
           <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {orderedJobs.map((job) => (
-              <JobCard key={job.id} job={job} isFavorited />
+              <JobCard key={job.id} job={job} isFavorited locale={locale} />
             ))}
           </div>
         ) : (
@@ -78,18 +82,18 @@ export default async function LikedJobsPage() {
             </div>
 
             <h2 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-950">
-              No saved jobs yet
+              {t.liked.emptyTitle}
             </h2>
 
             <p className="mt-3 text-sm font-semibold text-slate-600">
-              Saved jobs will appear here.
+              {t.liked.emptyDescription}
             </p>
 
             <Link
               href="/jobs"
               className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300"
             >
-              Browse jobs
+              {t.common.browseJobs}
             </Link>
           </div>
         )}

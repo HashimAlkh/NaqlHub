@@ -3,16 +3,20 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { logout } from "@/app/lib/authActions";
+import { getTranslations, type Locale } from "@/app/i18n";
 
 export default function ProfileMenu({
   align = "right",
   initials,
+  locale = "en",
 }: {
   align?: "left" | "right";
   initials: string;
+  locale?: Locale;
 }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const t = getTranslations(locale);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -52,11 +56,11 @@ export default function ProfileMenu({
             align === "left" ? "left-0" : "right-0"
           }`}
         >
-          <MenuLink href="/dashboard" label="Dashboard" />
-          <MenuLink href="/dashboard/jobs" label="My Jobs" />
-          <MenuLink href="/dashboard/liked-jobs" label="Saved Jobs" />
-          <MenuLink href="/dashboard/job-alerts" label="Job Alerts" />
-          <MenuLink href="/dashboard/profile" label="Profile" />
+          <MenuLink href="/dashboard" label={t.dashboard.label} />
+          <MenuLink href="/dashboard/jobs" label={t.dashboard.myJobs} />
+          <MenuLink href="/dashboard/liked-jobs" label={t.liked.title} />
+          <MenuLink href="/dashboard/job-alerts" label={t.dashboard.alerts} />
+          <MenuLink href="/dashboard/profile" label={t.profile.label} />
 
           <div className="my-2 h-px bg-slate-100" />
 
@@ -65,7 +69,7 @@ export default function ProfileMenu({
               type="submit"
               className="flex w-full px-4 py-2.5 text-left text-sm font-bold text-red-600 transition hover:bg-red-50"
             >
-              Logout
+              {t.dashboard.logout}
             </button>
           </form>
         </div>

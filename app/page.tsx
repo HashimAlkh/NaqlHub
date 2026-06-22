@@ -121,17 +121,38 @@ export default async function HomePage() {
                   "linear-gradient(180deg,rgba(7,21,43,.5) 0%,rgba(7,21,43,0) 80%,rgba(7,21,43,.8) 100%)",
               }}
             />
-            <div className={`absolute inset-0 flex flex-col justify-start px-5 pb-5 pt-5 ${isArabic ? "items-end text-right" : ""}`}>
-              <span className=" mb-3 inline-flex w-fit rounded-xl border border-amber-400/60 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300">
-                {t.home.eyebrow}
-              </span>
-              {/* max-w-[50%] keeps text strictly on the left half */}
-              <h1 className="max-w-[50%] whitespace-pre-line pt-4 text-lg font-extrabold leading-[1.1] tracking-tight">
-                {t.home.mobileTitle}
-              </h1>
-              <p className="mt-3 max-w-[48%] whitespace-pre-line text-sm leading-5 text-slate-300">
-                {t.home.mobileDescription}
-              </p>
+            <div
+              className={`absolute inset-0 flex flex-col justify-start px-5 pb-5 pt-5 ${
+                isArabic ? "items-end text-right" : ""
+              }`}
+            >
+              <div
+                className={
+                  isArabic
+                    ? "ml-auto flex w-1/2 flex-col text-right"
+                    : ""
+                }
+              >
+                <span className={`mb-3 inline-flex w-fit rounded-xl border border-amber-400/60 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300 ${isArabic ? "self-end" : ""}`}>
+                  {t.home.eyebrow}
+                </span>
+                <h1
+                  className={`whitespace-pre-line pt-4 font-extrabold tracking-tight ${
+                    isArabic
+                      ? "w-full text-lg leading-[1.1]"
+                      : "max-w-[50%] text-lg leading-[1.1]"
+                  }`}
+                >
+                  {t.home.mobileTitle}
+                </h1>
+                <p
+                  className={`mt-3 whitespace-pre-line text-sm leading-5 text-slate-300 ${
+                    isArabic ? "w-[96%] self-end" : "max-w-[48%]"
+                  }`}
+                >
+                  {t.home.mobileDescription}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -210,7 +231,7 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-          <div className={`flex items-center gap-24 py-7 lg:hidden ${isArabic ? "justify-end pe-5" : "justify-center"}`}>
+          <div className="flex items-center justify-center gap-24 py-7 lg:hidden">
   <MobileStat
     icon={<Briefcase />}
     value={`${activeJobsCount || 0}+`}

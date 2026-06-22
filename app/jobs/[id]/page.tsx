@@ -16,19 +16,21 @@ import FavoriteButton from "@/app/components/FavoriteButton";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
 import { formatWeight } from "@/app/lib/jobFormatters";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
-function formatValue(value: string | null | undefined) {
-  if (!value) return "Not specified";
+function formatValue(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
   return value.replaceAll("_", " ");
 }
 
-function formatDate(value: string | null | undefined) {
-  if (!value) return "Pickup date not set";
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
 
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
 
-  return date.toLocaleDateString("en-GB", {
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -50,6 +52,8 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const t = getTranslations(locale);
 
   const { data: job } = await supabaseAdmin
     .from("transport_jobs")
@@ -84,7 +88,7 @@ export default async function JobDetailPage({
                 href="/jobs"
                 className="absolute left-5 top-5 z-40 inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
               >
-                ← Back to jobs
+                ← {t.detail.backToJobs}
               </Link>
 
               {/* Desktop title overlay */}
@@ -108,7 +112,7 @@ export default async function JobDetailPage({
 
                   <span className="inline-flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {formatDate(job.pickup_date)}
+                    {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
                   </span>
                 </div>
               </div>
@@ -136,39 +140,39 @@ export default async function JobDetailPage({
 
               <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
                 <Calendar className="h-4 w-4 text-slate-500" />
-                {formatDate(job.pickup_date)}
+                {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 px-4 pb-5 pt-4 md:px-5 lg:grid-cols-4 lg:pt-5">
               <FactItem
                 icon={<Weight className="h-5 w-5" />}
-                label="Weight"
-                value={formatWeight(job.weight_kg)}
+                label={t.detail.weight}
+                value={formatWeight(job.weight_kg, t.jobs.weightNotSet)}
               />
 
               <FactItem
                 icon={<Truck className="h-5 w-5" />}
-                label="Vehicle"
-                value={formatValue(job.vehicle_type)}
+                label={t.detail.vehicle}
+                value={formatValue(job.vehicle_type, t.common.notSpecified)}
               />
 
               <FactItem
                 icon={<Package className="h-5 w-5" />}
-                label="Cargo"
-                value={formatValue(job.cargo_type)}
+                label={t.detail.cargo}
+                value={formatValue(job.cargo_type, t.common.notSpecified)}
               />
 
               <FactItem
                 icon={<Ruler className="h-5 w-5" />}
-                label="Dimensions"
+                label={t.detail.dimensions}
                 value={dimensions}
               />
             </div>
 
             <div className="border-t border-slate-100 px-5 pb-6 pt-4 md:px-7">
               <h2 className="text-lg font-extrabold tracking-tight text-slate-950">
-                Description
+                {t.detail.description}
               </h2>
 
               <p className="mt-3 max-w-3xl whitespace-pre-line text-sm leading-7 text-slate-600">
@@ -180,7 +184,7 @@ export default async function JobDetailPage({
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
               <div className="text-base font-extrabold text-slate-950">
-                Contact shipper
+                {t.detail.contactShipper}
               </div>
 
               <div className="mt-5 flex items-center gap-3 border-b border-slate-100 pb-5">
@@ -200,13 +204,13 @@ export default async function JobDetailPage({
 
               <div className="mt-5">
                 <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                  Budget
+                  {t.detail.budget}
                 </div>
 
                 <div className="mt-1 text-2xl font-extrabold text-amber-500">
                   {job.budget_sar
                     ? `SAR ${Number(job.budget_sar).toLocaleString()}`
-                    : "Open"}
+                    : t.common.open}
                 </div>
               </div>
 
@@ -216,14 +220,14 @@ export default async function JobDetailPage({
                 rel="noreferrer"
                 className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300"
               >
-                Contact via WhatsApp
+                {t.detail.contactWhatsApp}
               </a>
 
               <FavoriteButton
                 jobId={job.id}
                 initialFavorited={favoriteJobIds.has(job.id)}
                 className="mt-3 h-11 w-full rounded-xl border border-slate-200"
-                label="Save job"
+                label={t.detail.saveJob}
                 showText
               />
 
@@ -231,15 +235,14 @@ export default async function JobDetailPage({
                 href="/jobs"
                 className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50"
               >
-                Browse more jobs
+                {t.detail.browseMore}
               </Link>
 
               <div className="mt-6 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500">
                 <div className="flex items-start gap-2">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                   <span>
-                    Verify job details, permits, loading requirements and pricing
-                    directly with the shipper before accepting a transport.
+                    {t.detail.safetyNote}
                   </span>
                 </div>
               </div>

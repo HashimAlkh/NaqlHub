@@ -2,6 +2,7 @@ import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import FeaturedJobsCarouselClient from "./FeaturedJobsCarouselClient";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
+import { getLocale } from "@/app/lib/locale";
 
 type TransportJob = {
   id: string;
@@ -18,6 +19,7 @@ type TransportJob = {
 };
 
 export default async function FeaturedJobsCarousel() {
+  const locale = await getLocale();
   const { data, error } = await supabaseAdmin
     .from("transport_jobs")
     .select(
@@ -46,6 +48,7 @@ export default async function FeaturedJobsCarousel() {
     <FeaturedJobsCarouselClient
       jobs={jobs}
       favoriteJobIds={Array.from(favoriteJobIds)}
+      locale={locale}
     />
   );
 }

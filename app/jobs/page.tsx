@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
 import JobAlertDialog from "@/app/components/JobAlertDialog";
 import { getLocale } from "@/app/lib/locale";
+import { getTranslations } from "@/app/i18n";
 import {
   Search,
   MapPin,
@@ -13,8 +14,8 @@ import {
   Truck,
 } from "lucide-react";
 
-function formatValue(value: string | null | undefined) {
-  if (!value) return "Not specified";
+function formatValue(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
   return value.replaceAll("_", " ");
 }
 
@@ -39,6 +40,7 @@ export default async function JobsPage({
   const vehicleType = pick(sp, "vehicle_type").trim();
   const weight = pick(sp, "weight").trim();
   const locale = await getLocale();
+  const t = getTranslations(locale);
 
   let query = supabaseAdmin
     .from("transport_jobs")
@@ -75,8 +77,10 @@ if (weight === "30000+") {
   const hasRouteFilter = !!(origin || destination);
 
   const subtitle = hasRouteFilter
-    ? `Results for ${origin || "Anywhere"} → ${destination || "Anywhere"}`
-    : "All active transport jobs";
+    ? `${t.jobs.resultsFor} ${origin || t.alertsPage.anywhere} → ${
+        destination || t.alertsPage.anywhere
+      }`
+    : t.jobs.allActive;
 
   const homeQuery = new URLSearchParams();
   if (origin) homeQuery.set("origin", origin);
@@ -100,7 +104,7 @@ if (weight === "30000+") {
 <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
   <div>
     <h1 className="text-3xl font-bold tracking-tight text-slate-950">
-      Transport jobs
+      {t.jobs.title}
     </h1>
 
     <p className="mt-2 text-base text-slate-600">
@@ -108,7 +112,7 @@ if (weight === "30000+") {
     </p>
 
     <p className="mt-2 text-sm text-slate-500">
-      {jobCount} {jobCount === 1 ? "job" : "jobs"} found
+      {jobCount} {jobCount === 1 ? t.jobs.jobFound : t.jobs.jobsFound}
     </p>
   </div>
 
@@ -134,7 +138,7 @@ if (weight === "30000+") {
     "
   >
     <Search className="h-4 w-4" />
-    Change search
+    {t.jobs.changeSearch}
   </Link>
 </div>
 
@@ -143,24 +147,26 @@ if (weight === "30000+") {
           <div className="grid gap-5 md:grid-cols-3 md:divide-x md:divide-slate-200">
             <SummaryItem
               icon={<MapPin className="h-5 w-5" />}
-              label="Route"
+              label={t.jobs.route}
               value={
                 hasRouteFilter
-                  ? `${origin || "Anywhere"} → ${destination || "Anywhere"}`
-                  : "All routes"
+                  ? `${origin || t.alertsPage.anywhere} → ${
+                      destination || t.alertsPage.anywhere
+                    }`
+                  : t.jobs.allRoutes
               }
             />
 
             <SummaryItem
               icon={<Package className="h-5 w-5" />}
-              label="Cargo"
-              value={cargoType ? formatValue(cargoType) : "All cargo types"}
+              label={t.jobs.cargo}
+              value={cargoType ? formatValue(cargoType, t.common.notSpecified) : t.jobs.allCargo}
             />
 
             <SummaryItem
               icon={<Truck className="h-5 w-5" />}
-              label="Vehicle"
-              value={vehicleType ? formatValue(vehicleType) : "All vehicle types"}
+              label={t.jobs.vehicle}
+              value={vehicleType ? formatValue(vehicleType, t.common.notSpecified) : t.jobs.allVehicle}
             />
           </div>
         </div>
@@ -189,15 +195,16 @@ if (weight === "30000+") {
                 key={job.id}
                 job={job}
                 isFavorited={favoriteJobIds.has(job.id)}
+                locale={locale}
               />
             ))}
           </div>
         ) : (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">No jobs found</h2>
+            <h2 className="text-xl font-bold text-slate-900">{t.jobs.noJobs}</h2>
 
             <p className="mt-2 text-sm text-slate-600">
-              Try different filters or post a new transport request.
+              {t.jobs.noJobsDescription}
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -226,14 +233,14 @@ if (weight === "30000+") {
 "
               >
                 <Search className="h-4 w-4" />
-                Change search
+                {t.jobs.changeSearch}
               </Link>
 
               <Link
                 href="/create-listing"
                 className="inline-flex items-center justify-center rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-amber-300"
               >
-                Post a Job
+                {t.dashboard.postJob}
               </Link>
             </div>
           </div>

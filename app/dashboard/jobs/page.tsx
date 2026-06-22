@@ -5,6 +5,8 @@ import { requireUser } from "@/app/lib/auth";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 import { formatWeight } from "@/app/lib/jobFormatters";
 import JobManagementButtons from "./JobManagementButtons";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
 export const dynamic = "force-dynamic";
 
@@ -22,29 +24,29 @@ type DashboardJob = {
   created_at: string | null;
 };
 
-function formatValue(value: string | null | undefined) {
-  if (!value) return "Not specified";
+function formatValue(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
   return value.replaceAll("_", " ");
 }
 
-function formatDate(value: string | null | undefined) {
-  if (!value) return "Pickup date not set";
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
+  if (!value) return fallback;
 
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
 
-  return date.toLocaleDateString("en-GB", {
+  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
 }
 
-function statusBadge(status: string | null) {
+function statusBadge(status: string | null, labels: { active: string; inactive: string }) {
   const isInactive = status === "inactive";
 
   return {
-    label: isInactive ? "Inactive" : "Active",
+    label: isInactive ? labels.inactive : labels.active,
     className: isInactive
       ? "bg-slate-100 text-slate-600"
       : "bg-emerald-100 text-emerald-700",
@@ -53,6 +55,8 @@ function statusBadge(status: string | null) {
 
 export default async function DashboardJobsPage() {
   const user = await requireUser("/login?next=/dashboard/jobs");
+  const locale = await getLocale();
+  const t = getTranslations(locale);
 
   const { data: jobs } = await supabaseAdmin
     .from("transport_jobs")
@@ -74,13 +78,13 @@ export default async function DashboardJobsPage() {
               href="/dashboard"
               className="text-sm font-bold text-amber-600 hover:text-amber-700"
             >
-              Back to dashboard
+              {t.common.backToDashboard}
             </Link>
             <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">
-              My Jobs
+              {t.dashboard.myJobs}
             </h1>
             <p className="mt-2 text-sm text-slate-600">
-              Only transport jobs connected to your account are shown here.
+              {t.dashboard.myJobsDescription}
             </p>
           </div>
 
@@ -89,14 +93,17 @@ export default async function DashboardJobsPage() {
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300"
           >
             <PlusCircle className="h-4 w-4" />
-            Post a Job
+            {t.dashboard.postJob}
           </Link>
         </div>
 
         {jobs && jobs.length > 0 ? (
           <div className="mt-7 grid gap-4">
             {jobs.map((job) => {
-              const badge = statusBadge(job.status);
+              const badge = statusBadge(job.status, {
+                active: t.common.active,
+                inactive: t.common.inactive,
+              });
 
               return (
               <article
@@ -112,32 +119,32 @@ export default async function DashboardJobsPage() {
                         {badge.label}
                       </span>
                       <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold capitalize text-amber-700">
-                        {formatValue(job.cargo_type)}
+                        {formatValue(job.cargo_type, t.common.notSpecified)}
                       </span>
                     </div>
 
                     {job.status === "inactive" ? (
                       <h2 className="mt-3 text-xl font-extrabold leading-tight text-slate-950">
-                        {job.title || "Untitled transport job"}
+                        {job.title || t.jobs.untitled}
                       </h2>
                     ) : (
                       <Link
                         href={`/jobs/${job.id}`}
                         className="mt-3 block text-xl font-extrabold leading-tight text-slate-950 transition hover:text-amber-600"
                       >
-                        {job.title || "Untitled transport job"}
+                        {job.title || t.jobs.untitled}
                       </Link>
                     )}
 
                     <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600">
                       <span className="inline-flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-slate-500" />
-                        {job.origin_city || "Origin"} to{" "}
-                        {job.destination_city || "Destination"}
+                        {job.origin_city || t.alerts.origin} {locale === "ar" ? "←" : "to"}{" "}
+                        {job.destination_city || t.alerts.destination}
                       </span>
                       <span className="inline-flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-slate-500" />
-                        {formatDate(job.pickup_date)}
+                        {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
                       </span>
                     </div>
                   </div>
@@ -145,18 +152,18 @@ export default async function DashboardJobsPage() {
                   <div className="grid gap-2 text-sm font-bold text-slate-700 md:min-w-48 md:text-right">
                     <span className="inline-flex items-center gap-2 md:justify-end">
                       <Package className="h-4 w-4 text-slate-500" />
-                      {formatWeight(job.weight_kg)}
+                      {formatWeight(job.weight_kg, t.jobs.weightNotSet)}
                     </span>
                     <span className="inline-flex items-center gap-2 capitalize md:justify-end">
                       <Truck className="h-4 w-4 text-slate-500" />
-                      {formatValue(job.vehicle_type)}
+                      {formatValue(job.vehicle_type, t.common.notSpecified)}
                     </span>
                     <span className="text-emerald-700">
                       {job.budget_sar
                         ? `SAR ${Number(job.budget_sar).toLocaleString()}`
-                        : "Open budget"}
+                        : t.common.openBudget}
                     </span>
-                    <JobManagementButtons jobId={job.id} status={job.status} />
+                    <JobManagementButtons jobId={job.id} status={job.status} locale={locale} />
                   </div>
                 </div>
               </article>
@@ -166,16 +173,16 @@ export default async function DashboardJobsPage() {
         ) : (
           <div className="mt-7 rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
             <h2 className="text-xl font-extrabold text-slate-950">
-              No jobs yet
+              {t.management.noJobsYet}
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              Your posted transport jobs will appear here.
+              {t.management.postedJobsDescription}
             </p>
             <Link
               href="/create-listing"
               className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300"
             >
-              Post your first job
+              {t.management.postFirstJob}
             </Link>
           </div>
         )}
