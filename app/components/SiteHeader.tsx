@@ -47,7 +47,11 @@ export default async function SiteHeader({ sticky }: SiteHeaderProps) {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link
+          href={`/?lang=${locale}`}
+          prefetch={false}
+          className="flex items-center gap-2"
+        >
           <span className="text-2xl font-bold tracking-tight text-slate-900">
             Naql<span className="text-amber-500">Hub</span>
           </span>
@@ -75,7 +79,10 @@ export default async function SiteHeader({ sticky }: SiteHeaderProps) {
 
         <div className="flex items-center gap-2">
           {user ? (
-            <ProfileMenu initials={initials} />
+            <ProfileMenu
+              align={locale === "ar" ? "left" : "right"}
+              initials={initials}
+            />
           ) : (
             <Link
   href="/login"

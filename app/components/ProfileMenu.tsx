@@ -5,8 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { logout } from "@/app/lib/authActions";
 
 export default function ProfileMenu({
+  align = "right",
   initials,
 }: {
+  align?: "left" | "right";
   initials: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -45,7 +47,11 @@ export default function ProfileMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-xl">
+        <div
+          className={`absolute top-12 z-50 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-xl ${
+            align === "left" ? "left-0" : "right-0"
+          }`}
+        >
           <MenuLink href="/dashboard" label="Dashboard" />
           <MenuLink href="/dashboard/jobs" label="My Jobs" />
           <MenuLink href="/dashboard/liked-jobs" label="Saved Jobs" />

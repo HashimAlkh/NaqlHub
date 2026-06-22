@@ -133,7 +133,7 @@ export default function JobCard({
 
         <div className="absolute bottom-8 right-4 z-10 rounded-full bg-white/95 px-2.5 py-1 text-sm font-extrabold text-slate-900 shadow-md backdrop-blur">
           {job.budget_sar
-            ? `SAR ${Number(job.budget_sar).toLocaleString()}`
+            ? `SAR ${Number(job.budget_sar).toLocaleString("en-US")}`
             : "Open"}
         </div>
       </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { Locale } from "@/app/i18n";
 
@@ -21,6 +20,10 @@ export default function LanguageSwitcher({
   const searchParams = useSearchParams();
   const currentParams = new URLSearchParams(searchParams.toString());
 
+  function switchLocale(nextLocale: Locale) {
+    window.location.href = localeHref(pathname, currentParams, nextLocale);
+  }
+
   return (
     <div
       className={`inline-flex items-center rounded-lg p-0.5 text-[11px] font-extrabold ${
@@ -29,8 +32,9 @@ export default function LanguageSwitcher({
           : "border border-slate-200 bg-slate-50 text-slate-500"
       }`}
     >
-      <Link
-        href={localeHref(pathname, currentParams, "en")}
+      <button
+        type="button"
+        onClick={() => switchLocale("en")}
         className={`rounded-md px-1.5 py-1 transition ${
           locale === "en"
             ? "bg-amber-400 text-slate-950 shadow-sm"
@@ -41,9 +45,10 @@ export default function LanguageSwitcher({
         aria-label="Switch to English"
       >
         EN
-      </Link>
-      <Link
-        href={localeHref(pathname, currentParams, "ar")}
+      </button>
+      <button
+        type="button"
+        onClick={() => switchLocale("ar")}
         className={`rounded-md px-1.5 py-1 transition ${
           locale === "ar"
             ? "bg-amber-400 text-slate-950 shadow-sm"
@@ -54,7 +59,7 @@ export default function LanguageSwitcher({
         aria-label="التبديل إلى العربية"
       >
         AR
-      </Link>
+      </button>
     </div>
   );
 }
