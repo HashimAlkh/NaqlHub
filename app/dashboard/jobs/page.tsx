@@ -3,6 +3,7 @@ import { Calendar, MapPin, Package, PlusCircle, Truck } from "lucide-react";
 import SiteHeader from "@/app/components/SiteHeader";
 import { requireUser } from "@/app/lib/auth";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import { formatWeight } from "@/app/lib/jobFormatters";
 import JobManagementButtons from "./JobManagementButtons";
 
 export const dynamic = "force-dynamic";
@@ -144,9 +145,7 @@ export default async function DashboardJobsPage() {
                   <div className="grid gap-2 text-sm font-bold text-slate-700 md:min-w-48 md:text-right">
                     <span className="inline-flex items-center gap-2 md:justify-end">
                       <Package className="h-4 w-4 text-slate-500" />
-                      {job.weight_kg
-                        ? `${Number(job.weight_kg).toLocaleString()} kg`
-                        : "Weight not set"}
+                      {formatWeight(job.weight_kg)}
                     </span>
                     <span className="inline-flex items-center gap-2 capitalize md:justify-end">
                       <Truck className="h-4 w-4 text-slate-500" />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import ListingCard from "./JobCard";
+import ListingCard from "./ListingCard";
 
 type Listing = {
   id: string;

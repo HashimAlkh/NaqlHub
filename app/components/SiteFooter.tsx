@@ -13,7 +13,7 @@ export default function SiteFooter() {
             </div>
 
             <p className="mt-3 max-w-sm text-sm text-slate-600">
-              Saudi Arabia's marketplace for heavy transport,
+              Saudi Arabia&apos;s marketplace for heavy transport,
               oversized cargo and industrial logistics.
             </p>
           </div>

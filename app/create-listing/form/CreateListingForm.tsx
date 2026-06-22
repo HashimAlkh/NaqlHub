@@ -369,8 +369,8 @@ function fillTestData() {
     title: "Transport excavator from Riyadh to Jeddah",
     cargo_type: "heavy_equipment",
     vehicle_type: "lowbed_trailer",
-    weight_kg: "45000",
-    budget_sar: "12000",
+    weight_kg: "45",
+    budget_sar: "1200",
     length_m: "12.5",
     width_m: "3.2",
     height_m: "4.1",
@@ -487,13 +487,18 @@ function fillTestData() {
           </div>
 
           <div>
-            <label className="ms-label">Weight (kg)</label>
+            <label className="ms-label">Weight (t)</label>
             <input
               name="weight_kg"
               type="number"
-              min={1}
-              defaultValue={initialDraft?.weight_kg ?? ""}
-              placeholder="45000"
+              min={0.001}
+              step="0.001"
+              defaultValue={
+                initialDraft?.weight_kg != null
+                  ? initialDraft.weight_kg / 1000
+                  : ""
+              }
+              placeholder="45"
               className="ms-input mt-1"
               required
             />
@@ -506,7 +511,7 @@ function fillTestData() {
               type="number"
               min={0}
               defaultValue={initialDraft?.budget_sar ?? ""}
-              placeholder="12000"
+              placeholder="1200"
               className="ms-input mt-1"
             />
           </div>

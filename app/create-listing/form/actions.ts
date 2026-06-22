@@ -41,12 +41,22 @@ function requiredString(formData: FormData, key: string) {
   return value;
 }
 
+function requiredWeightKg(formData: FormData) {
+  const tons = Number(requiredString(formData, "weight_kg"));
+
+  if (!Number.isFinite(tons) || tons <= 0) {
+    throw new Error("weight_kg must be a positive weight in tonnes");
+  }
+
+  return Math.round(tons * 1000);
+}
+
 function jobPayload(formData: FormData, userId: string) {
   return {
     title: requiredString(formData, "title"),
     cargo_type: requiredString(formData, "cargo_type"),
     vehicle_type: requiredString(formData, "vehicle_type"),
-    weight_kg: Number(requiredString(formData, "weight_kg")),
+    weight_kg: requiredWeightKg(formData),
     budget_sar: optionalNumber(formData.get("budget_sar")),
     length_m: optionalNumber(formData.get("length_m")),
     width_m: optionalNumber(formData.get("width_m")),

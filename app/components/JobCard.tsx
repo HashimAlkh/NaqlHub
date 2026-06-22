@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Package, Truck, Calendar } from "lucide-react";
+import { Calendar, MapPin, Package, Weight } from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
 import { formatWeight } from "@/app/lib/jobFormatters";
 
@@ -41,6 +41,50 @@ const urgencyConfig: Record<string, { label: string; className: string }> = {
   new: { label: "NEW", className: "bg-green-100 text-green-700" },
   normal: { label: "NORMAL", className: "bg-slate-100 text-slate-600" },
 };
+
+const vehicleLabels: Record<string, string> = {
+  lowbed_trailer: "Lowbed",
+  flatbed_trailer: "Flatbed",
+  extendable_trailer: "Extendable",
+};
+
+const cargoLabels: Record<string, string> = {
+  heavy_equipment: "Heavy Equipment",
+  industrial_cargo: "Industrial",
+  oversized_load: "Oversized",
+  construction_materials: "Construction",
+};
+
+function formatVehicle(value: string | null | undefined) {
+  if (!value) return "Not specified";
+  return vehicleLabels[value] || formatValue(value);
+}
+
+function formatCargo(value: string | null | undefined) {
+  if (!value) return "Not specified";
+  return cargoLabels[value] || formatValue(value);
+}
+
+function TrailerIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M2.5 5.5h11.5v9H2.5z" />
+      <path d="M14 10h3.5l3 3v1.5H14" />
+      <path d="M2.5 14.5h18" />
+      <circle cx="6" cy="17" r="1.5" />
+      <circle cx="17.5" cy="17" r="1.5" />
+    </svg>
+  );
+}
 
 export default function JobCard({
   job,
@@ -118,26 +162,21 @@ export default function JobCard({
           </span>
         </div>
 
-<div className="mt-auto border-t border-slate-100 pt-3">
-
-  <div className="grid grid-cols-3 divide-x divide-slate-100 text-[11px] font-semibold text-slate-700">
-
-    <span className="inline-flex min-w-0 items-center gap-1 pr-2">
-
-      <Package className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-
-      <span className="truncate">
-                {formatWeight(job.weight_kg)}
-              </span>
+        <div className="mt-auto border-t border-slate-100 ">
+          <div className="grid min-h-12 grid-cols-3 divide-x divide-slate-100 text-[11px] font-semibold leading-4 text-slate-700">
+            <span className="flex min-w-0 items-center justify-center gap-1.5 pr-2 pb-2">
+              <TrailerIcon className="h-4 w-4 shrink-1 text-slate-600" />
+              <span className="min-w-0 break-words">{formatVehicle(job.vehicle_type)}</span>
             </span>
 
-            <span className="inline-flex min-w-0 items-center gap-1.5 px-3">
-              <Truck className="h-4 w-4 shrink-0 text-slate-500" />
-              <span className="truncate">{formatValue(job.vehicle_type)}</span>
+            <span className="flex min-w-0 items-center justify-center gap-1.5 px-1 pb-2">
+              <Weight className="h-4 w-4 shrink-1 text-slate-500" />
+              <span className="min-w-0 break-words">{formatWeight(job.weight_kg)}</span>
             </span>
 
-            <span className="truncate pl-3 capitalize">
-              {formatValue(job.cargo_type)}
+            <span className="flex min-w-0 items-center justify-center gap-1.5 pl-2 pb-2">
+              <Package className="h-4 w-4 shrink-1 text-slate-500" />
+              <span className="min-w-0 break-words">{formatCargo(job.cargo_type)}</span>
             </span>
           </div>
         </div>
