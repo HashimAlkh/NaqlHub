@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Bell, Calendar, MapPin, Package, Trash2, Truck } from "lucide-react";
 import SiteHeader from "@/app/components/SiteHeader";
 import JobAlertDialog from "@/app/components/JobAlertDialog";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 import {
   deleteJobAlert,
   getUserJobAlerts,
@@ -29,6 +31,8 @@ function formatDate(value: string | null) {
 
 export default async function DashboardJobAlertsPage() {
   const alerts = await getUserJobAlerts();
+  const locale = await getLocale();
+  const t = getTranslations(locale).alerts;
 
   return (
     <main className="min-h-screen bg-[#f2f3f5] text-slate-900">
@@ -60,7 +64,8 @@ export default async function DashboardJobAlertsPage() {
               vehicle_type: "",
             }}
             returnTo="/dashboard/job-alerts"
-            triggerLabel="Create Alert"
+            locale={locale}
+            triggerLabel={t.create}
           />
         </div>
 
@@ -89,7 +94,8 @@ export default async function DashboardJobAlertsPage() {
                   vehicle_type: "",
                 }}
                 returnTo="/dashboard/job-alerts"
-                triggerLabel="Create Alert"
+                locale={locale}
+                triggerLabel={t.create}
               />
               <Link
                 href="/jobs"

@@ -5,6 +5,8 @@ import SiteHeader from "@/app/components/SiteHeader";
 import { requireUser } from "@/app/lib/auth";
 import { logout } from "@/app/lib/authActions";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,8 @@ export default async function DashboardPage() {
     .maybeSingle();
 
   const displayName = profile?.full_name || profile?.email || user.email;
+  const locale = await getLocale();
+  const t = getTranslations(locale).dashboard;
 
   return (
     <main className="min-h-screen bg-[#f2f3f5] text-slate-900">
@@ -26,17 +30,16 @@ export default async function DashboardPage() {
       <section className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
         <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <div className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            Dashboard
+            {t.label}
           </div>
 
           <div className="mt-5 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">
-                Welcome back{displayName ? `, ${displayName}` : ""}
+                {t.welcomeBack}{displayName ? `, ${displayName}` : ""}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                Manage your transport requests and create new jobs for carriers
-                across Saudi Arabia.
+                {t.description}
               </p>
             </div>
 
@@ -46,7 +49,7 @@ export default async function DashboardPage() {
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
               >
                 <LogOut className="h-4 w-4" />
-                Logout
+                {t.logout}
               </button>
             </form>
           </div>
@@ -61,10 +64,10 @@ export default async function DashboardPage() {
               <BriefcaseBusiness className="h-6 w-6" />
             </div>
             <h2 className="mt-5 text-xl font-extrabold text-slate-950">
-              My Jobs
+              {t.myJobs}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              View the transport jobs you have posted.
+              {t.myJobsDescription}
             </p>
           </Link>
 
@@ -76,11 +79,10 @@ export default async function DashboardPage() {
               <PlusCircle className="h-6 w-6" />
             </div>
             <h2 className="mt-5 text-xl font-extrabold text-slate-950">
-              Post a Job
+              {t.postJob}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              Create a new transport request with cargo, route and contact
-              details.
+              {t.postJobDescription}
             </p>
           </Link>
         </div>
@@ -93,10 +95,10 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <h2 className="text-xl font-extrabold text-slate-950">
-                  Job Alerts
+                  {t.alerts}
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-700">
-                  Get notified when matching transport jobs are posted.
+                  {t.alertsDescription}
                 </p>
               </div>
             </div>
@@ -110,13 +112,14 @@ export default async function DashboardPage() {
                   vehicle_type: "",
                 }}
                 returnTo="/dashboard/job-alerts"
-                triggerLabel="Create Alert"
+                locale={locale}
+                triggerLabel={getTranslations(locale).alerts.create}
               />
               <Link
                 href="/dashboard/job-alerts"
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-amber-300 bg-white px-5 text-sm font-extrabold text-slate-800 transition hover:bg-amber-100"
               >
-                Manage Alerts
+                {t.manageAlerts}
               </Link>
             </div>
           </div>

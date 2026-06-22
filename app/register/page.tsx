@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import SiteHeader from "@/app/components/SiteHeader";
 import { getCurrentUser } from "@/app/lib/auth";
 import { registerWithPassword } from "@/app/lib/authActions";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
 function pick(
   searchParams: Record<string, string | string[] | undefined>,
@@ -22,6 +24,7 @@ export default async function RegisterPage({
 
   const sp = await searchParams;
   const error = pick(sp, "error");
+  const t = getTranslations(await getLocale()).auth;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -30,16 +33,15 @@ export default async function RegisterPage({
       <section className="mx-auto flex max-w-6xl items-center justify-center px-4 py-12 md:py-16">
         <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <div className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            Create shipper account
+            {t.createShipperAccount}
           </div>
 
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
-            Register for NaqlHub
+            {t.registerTitle}
           </h1>
 
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Post transport jobs, track your requests and keep everything under
-            one account.
+            {t.registerDescription}
           </p>
 
           {error && (
@@ -51,7 +53,7 @@ export default async function RegisterPage({
           <form action={registerWithPassword} className="mt-6 grid gap-4">
             <div>
               <label className="ms-label" htmlFor="full_name">
-                Full name
+                {t.fullName}
               </label>
               <input
                 id="full_name"
@@ -65,7 +67,7 @@ export default async function RegisterPage({
 
             <div>
               <label className="ms-label" htmlFor="phone">
-                Phone
+                {t.phone}
               </label>
               <input
                 id="phone"
@@ -79,7 +81,8 @@ export default async function RegisterPage({
 
             <div>
               <label className="ms-label" htmlFor="company_name">
-                Company name <span className="font-medium text-slate-400">(optional)</span>
+                {t.companyName}{" "}
+                <span className="font-medium text-slate-400">({t.optional})</span>
               </label>
               <input
                 id="company_name"
@@ -92,7 +95,7 @@ export default async function RegisterPage({
 
             <div>
               <label className="ms-label" htmlFor="email">
-                Email
+                {t.email}
               </label>
               <input
                 id="email"
@@ -106,7 +109,7 @@ export default async function RegisterPage({
 
             <div>
               <label className="ms-label" htmlFor="password">
-                Password
+                {t.password}
               </label>
               <input
                 id="password"
@@ -123,14 +126,14 @@ export default async function RegisterPage({
               type="submit"
               className="mt-2 rounded-2xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-300"
             >
-              Create account
+              {t.createAccountButton}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm font-semibold text-slate-600">
-            Already have an account?{" "}
+            {t.alreadyHaveAccount}{" "}
             <Link href="/login" className="text-amber-600 hover:text-amber-700">
-              Log in
+              {t.login}
             </Link>
           </p>
         </div>

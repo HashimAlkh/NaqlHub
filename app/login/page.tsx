@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import SiteHeader from "@/app/components/SiteHeader";
 import { loginWithPassword } from "@/app/lib/authActions";
 import { getCurrentUser } from "@/app/lib/auth";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 
 function pick(
   searchParams: Record<string, string | string[] | undefined>,
@@ -24,6 +26,7 @@ export default async function LoginPage({
   const error = pick(sp, "error");
   const registered = pick(sp, "registered");
   const next = pick(sp, "next") || "/dashboard";
+  const t = getTranslations(await getLocale()).auth;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -32,16 +35,15 @@ export default async function LoginPage({
       <section className="mx-auto flex max-w-6xl items-center justify-center px-4 py-12 md:py-16">
         <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <div className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            Shipper account
+            {t.shipperAccount}
           </div>
 
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
-            Log in to NaqlHub
+            {t.loginTitle}
           </h1>
 
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Manage your transport jobs and post new requests from your
-            dashboard.
+            {t.loginDescription}
           </p>
 
           {registered && (
@@ -61,7 +63,7 @@ export default async function LoginPage({
 
             <div>
               <label className="ms-label" htmlFor="email">
-                Email
+                {t.email}
               </label>
               <input
                 id="email"
@@ -75,7 +77,7 @@ export default async function LoginPage({
 
             <div>
               <label className="ms-label" htmlFor="password">
-                Password
+                {t.password}
               </label>
               <input
                 id="password"
@@ -91,14 +93,14 @@ export default async function LoginPage({
               type="submit"
               className="mt-2 rounded-2xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-300"
             >
-              Log in
+              {t.login}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm font-semibold text-slate-600">
-            New to NaqlHub?{" "}
+            {t.newToNaqlHub}{" "}
             <Link href="/register" className="text-amber-600 hover:text-amber-700">
-              Create an account
+              {t.createAccount}
             </Link>
           </p>
         </div>

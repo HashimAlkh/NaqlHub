@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import { useFormStatus } from "react-dom";
 import { Bell, ChevronDown, MapPin, X } from "lucide-react";
 import { createJobAlert } from "@/app/lib/jobAlerts";
+import { getTranslations, type Locale } from "@/app/i18n";
 import { SAUDI_CITIES } from "@/app/lib/saudiCities";
 
 type AlertFilters = {
@@ -27,13 +28,17 @@ const inputClassName =
 export default function JobAlertDialog({
   initialFilters,
   returnTo,
-  triggerLabel = "Create Job Alert",
+  locale = "en",
+  triggerLabel,
 }: {
   initialFilters: AlertFilters;
   returnTo: string;
+  locale?: Locale;
   triggerLabel?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const translations = getTranslations(locale);
+  const t = translations.alerts;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -63,7 +68,7 @@ export default function JobAlertDialog({
         className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-300 sm:w-auto"
       >
         <Bell className="h-4 w-4" />
-        {triggerLabel}
+        {triggerLabel || t.trigger}
       </button>
 
       {isOpen &&
@@ -84,16 +89,16 @@ export default function JobAlertDialog({
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
                     <Bell className="h-3.5 w-3.5" />
-                    Job Alert
+                    {t.badge}
                   </div>
                   <h2
                     id="job-alert-title"
                     className="mt-3 text-2xl font-extrabold tracking-tight text-slate-950"
                   >
-                    Save this search
+                    {t.title}
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Adjust the criteria before saving your job alert.
+                    {t.description}
                   </p>
                 </div>
 
@@ -101,7 +106,7 @@ export default function JobAlertDialog({
                   type="button"
                   onClick={() => setIsOpen(false)}
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
-                  aria-label="Close job alert form"
+                  aria-label={t.close}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -111,41 +116,41 @@ export default function JobAlertDialog({
                 <input type="hidden" name="return_to" value={returnTo} />
                 <CityAutocomplete
                   name="origin_city"
-                  label="Origin city"
+                  label={t.origin}
                   initialValue={initialFilters.origin_city}
                   placeholder="Riyadh"
                 />
                 <CityAutocomplete
                   name="destination_city"
-                  label="Destination city"
+                  label={t.destination}
                   initialValue={initialFilters.destination_city}
                   placeholder="Jeddah"
                 />
                 <AlertSelect
                   name="cargo_type"
-                  label="Cargo type"
+                  label={t.cargo}
                   defaultValue={initialFilters.cargo_type}
                 >
-                  <option value="">Any cargo type</option>
-                  <option value="heavy_equipment">Heavy equipment</option>
-                  <option value="industrial_cargo">Industrial cargo</option>
-                  <option value="oversized_load">Oversized load</option>
-                  <option value="construction_materials">Construction materials</option>
-                  <option value="containers">Containers</option>
-                  <option value="other">Other</option>
+                  <option value="">{t.anyCargo}</option>
+                  <option value="heavy_equipment">{translations.home.heavyEquipment}</option>
+                  <option value="industrial_cargo">{translations.home.industrialCargo}</option>
+                  <option value="oversized_load">{translations.home.oversizedLoad}</option>
+                  <option value="construction_materials">{t.constructionMaterials}</option>
+                  <option value="containers">{t.containers}</option>
+                  <option value="other">{t.other}</option>
                 </AlertSelect>
                 <AlertSelect
                   name="vehicle_type"
-                  label="Vehicle type"
+                  label={t.vehicle}
                   defaultValue={initialFilters.vehicle_type}
                 >
-                  <option value="">Any vehicle type</option>
-                  <option value="lowbed_trailer">Lowbed trailer</option>
-                  <option value="flatbed_trailer">Flatbed trailer</option>
-                  <option value="extendable_trailer">Extendable trailer</option>
-                  <option value="crane_truck">Crane truck</option>
-                  <option value="container_truck">Container truck</option>
-                  <option value="not_sure">Not sure</option>
+                  <option value="">{t.anyVehicle}</option>
+                  <option value="lowbed_trailer">{translations.home.lowbedTrailer}</option>
+                  <option value="flatbed_trailer">{translations.home.flatbedTrailer}</option>
+                  <option value="extendable_trailer">{translations.home.extendableTrailer}</option>
+                  <option value="crane_truck">{t.craneTruck}</option>
+                  <option value="container_truck">{t.containerTruck}</option>
+                  <option value="not_sure">{t.notSure}</option>
                 </AlertSelect>
 
                 <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -154,9 +159,9 @@ export default function JobAlertDialog({
                     onClick={() => setIsOpen(false)}
                     className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 px-5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50"
                   >
-                    Cancel
+                    {t.cancel}
                   </button>
-                  <SaveAlertButton />
+                  <SaveAlertButton savingLabel={t.saving} saveLabel={t.save} />
                 </div>
               </form>
             </section>
@@ -314,7 +319,13 @@ function CityAutocomplete({
   );
 }
 
-function SaveAlertButton() {
+function SaveAlertButton({
+  savingLabel,
+  saveLabel,
+}: {
+  savingLabel: string;
+  saveLabel: string;
+}) {
   const { pending } = useFormStatus();
 
   return (
@@ -324,7 +335,7 @@ function SaveAlertButton() {
       className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 text-sm font-extrabold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
     >
       <Bell className="h-4 w-4" />
-      {pending ? "Saving alert..." : "Save Job Alert"}
+      {pending ? savingLabel : saveLabel}
     </button>
   );
 }

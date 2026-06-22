@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import JobCard from "./components/JobCard";
 import FeaturedJobsCarousel from "./components/FeaturedJobsCarousel";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import { getTranslations } from "./i18n";
+import { getLocale } from "./lib/locale";
 
 function formatValue(value: string | null | undefined) {
   if (!value) return "Not specified";
@@ -29,6 +32,9 @@ const urgencyConfig: Record<string, { label: string; className: string }> = {
 };
 
 export default async function HomePage() {
+  const locale = await getLocale();
+  const t = getTranslations(locale);
+  const isArabic = locale === "ar";
   const { data: jobs } = await supabaseAdmin
     .from("transport_jobs")
     .select("*")
@@ -60,12 +66,12 @@ export default async function HomePage() {
       <SiteHeader sticky />
 
       {/* ═══════════ HERO ═══════════ */}
-      <section className="relative bg-[#07152b] text-white">
+      <section className="relative bg-[#07152b] text-white" dir={isArabic ? "rtl" : undefined}>
 
         {/* Desktop bg image — only ≥ lg */}
         <div className="absolute inset-0 hidden lg:block">
           <div
-            className="absolute inset-0 bg-cover"
+            className={`absolute inset-0 bg-cover ${isArabic ? "scale-x-[-1]" : ""}`}
             style={{
               backgroundImage: "url('/truck-hero.png')",
               backgroundPosition: "62% center",
@@ -75,27 +81,36 @@ export default async function HomePage() {
           <div
             className="absolute inset-0"
             style={{
-              background:
-                "linear-gradient(90deg,#07152b 0%,#07152b 38%,rgba(7,21,43,.92) 42%,rgba(7,21,43,.3) 75%,rgba(7,21,43,0) 100%)",
+              background: isArabic
+                ? "linear-gradient(270deg,#07152b 0%,#07152b 38%,rgba(7,21,43,.92) 42%,rgba(7,21,43,.3) 75%,rgba(7,21,43,0) 100%)"
+                : "linear-gradient(90deg,#07152b 0%,#07152b 38%,rgba(7,21,43,.92) 42%,rgba(7,21,43,.3) 75%,rgba(7,21,43,0) 100%)",
             }}
           />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-0 py-0 lg:px-10 lg:py-2">
+        <div className={`relative mx-auto max-w-7xl px-0 py-0 lg:px-10 lg:py-2 ${isArabic ? "text-right" : ""}`}>
+          <div
+            className={`absolute top-4 z-30 ${
+              isArabic ? "left-4" : "right-4"
+            } lg:left-10 lg:right-auto`}
+          >
+            <LanguageSwitcher locale={locale} variant="hero" />
+          </div>
 
           {/* ── Mobile hero image (< lg) ── */}
           <div className="relative h-[240px] w-full overflow-hidden lg:hidden">
             <img
               src="/truck-hero.png"
               alt="Heavy transport truck"
-              className="h-full w-full object-cover"
+              className={`h-full w-full object-cover ${isArabic ? "scale-x-[-1]" : ""}`}
             />
             {/* left-to-right fade: left half dark, right half transparent */}
             <div
               className="absolute inset-0"
               style={{
-                background:
-                  "linear-gradient(90deg,rgba(7,21,43,.95) 0%,rgba(7,21,43,.85) 35%,rgba(7,21,43,.2) 65%,rgba(7,21,43,0) 100%)",
+              background: isArabic
+                ? "linear-gradient(270deg,rgba(7,21,43,.95) 0%,rgba(7,21,43,.85) 35%,rgba(7,21,43,.2) 65%,rgba(7,21,43,0) 100%)"
+                : "linear-gradient(90deg,rgba(7,21,43,.95) 0%,rgba(7,21,43,.85) 35%,rgba(7,21,43,.2) 65%,rgba(7,21,43,0) 100%)",
               }}
             />
             {/* top-to-bottom subtle fade for depth */}
@@ -106,44 +121,47 @@ export default async function HomePage() {
                   "linear-gradient(180deg,rgba(7,21,43,.5) 0%,rgba(7,21,43,0) 80%,rgba(7,21,43,.8) 100%)",
               }}
             />
-            <div className="absolute inset-0 flex flex-col justify-start px-5 pb-5 pt-5">
+            <div className={`absolute inset-0 flex flex-col justify-start px-5 pb-5 pt-5 ${isArabic ? "items-end text-right" : ""}`}>
               <span className=" mb-3 inline-flex w-fit rounded-xl border border-amber-400/60 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300">
-                Heavy transport marketplace for Saudi Arabia
+                {t.home.eyebrow}
               </span>
               {/* max-w-[50%] keeps text strictly on the left half */}
-              <h1 className="max-w-[50%] text-lg font-extrabold leading-[1.1] tracking-tight pt-4">
-                The right transport.<br />Every time.
+              <h1 className="max-w-[50%] whitespace-pre-line pt-4 text-lg font-extrabold leading-[1.1] tracking-tight">
+                {t.home.mobileTitle}
               </h1>
-              <p className="mt-3 max-w-[48%] text-sm leading-5 text-slate-300">
-                Connect with verified <br /> 
-                carriers for your heavy cargo.
+              <p className="mt-3 max-w-[48%] whitespace-pre-line text-sm leading-5 text-slate-300">
+                {t.home.mobileDescription}
               </p>
             </div>
           </div>
 
           {/* ── Desktop headline (≥ lg) ── */}
-          <div className="hidden lg:block pt-16 pb-12">
+          <div className={`hidden pt-16 pb-12 lg:block ${isArabic ? "text-right" : ""}`}>
             <span className="inline-flex rounded-full border border-amber-400/50 bg-amber-400/10 px-4 py-1 text-sm font-medium text-amber-200">
-              Heavy transport marketplace for Saudi Arabia
+              {t.home.eyebrow}
             </span>
             <h1 className="mt-5 max-w-[560px] text-[52px] font-extrabold leading-[1.05] tracking-tight">
-              Find the right transport for every heavy load.
+              {t.home.desktopTitle}
             </h1>
             <p className="mt-4 max-w-[480px] text-lg leading-7 text-slate-300">
-              The leading platform connecting shippers with trusted transport
-              providers across Saudi Arabia.
+              {t.home.desktopDescription}
             </p>
           </div>
 
           {/* ── Mobile search (< lg) ── */}
           <div className="mt-0 px-4 pb-4 lg:hidden">
-            <div className="rounded-2xl border border-white/10 bg-[#0c1d35] p-3">
+            <div
+              dir={isArabic ? "rtl" : undefined}
+              className={`rounded-2xl border border-white/10 bg-[#0c1d35] p-3 ${
+                isArabic ? "text-right" : ""
+              }`}
+            >
               <div className="space-y-2">
                 <label className="flex h-10 items-center gap-3 rounded-xl border border-white/10 bg-[#07152b] px-4 cursor-text">
                   <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
                   <input
                     name="origin"
-                    placeholder="From"
+                    placeholder={t.home.from}
                     className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
                   />
                 </label>
@@ -151,7 +169,7 @@ export default async function HomePage() {
                   <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
                   <input
                     name="destination"
-                    placeholder="To"
+                    placeholder={t.home.to}
                     className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
                   />
                 </label>
@@ -162,10 +180,10 @@ export default async function HomePage() {
                     defaultValue=""
                     className="w-full bg-transparent text-sm text-white outline-none appearance-none"
                   >
-                    <option value="" className="bg-[#07152b]">Cargo Type</option>
-                    <option value="heavy_equipment" className="bg-[#07152b]">Heavy Equipment</option>
-                    <option value="industrial_cargo" className="bg-[#07152b]">Industrial Cargo</option>
-                    <option value="oversized_load" className="bg-[#07152b]">Oversized Load</option>
+                    <option value="" className="bg-[#07152b]">{t.home.cargoType}</option>
+                    <option value="heavy_equipment" className="bg-[#07152b]">{t.home.heavyEquipment}</option>
+                    <option value="industrial_cargo" className="bg-[#07152b]">{t.home.industrialCargo}</option>
+                    <option value="oversized_load" className="bg-[#07152b]">{t.home.oversizedLoad}</option>
                   </select>
                   <svg className="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </label>
@@ -176,10 +194,10 @@ export default async function HomePage() {
                     defaultValue=""
                     className="w-full bg-transparent text-sm text-white outline-none appearance-none"
                   >
-                    <option value="" className="bg-[#07152b]">Vehicle Type</option>
-                    <option value="lowbed_trailer" className="bg-[#07152b]">Lowbed Trailer</option>
-                    <option value="flatbed_trailer" className="bg-[#07152b]">Flatbed Trailer</option>
-                    <option value="extendable_trailer" className="bg-[#07152b]">Extendable Trailer</option>
+                    <option value="" className="bg-[#07152b]">{t.home.vehicleType}</option>
+                    <option value="lowbed_trailer" className="bg-[#07152b]">{t.home.lowbedTrailer}</option>
+                    <option value="flatbed_trailer" className="bg-[#07152b]">{t.home.flatbedTrailer}</option>
+                    <option value="extendable_trailer" className="bg-[#07152b]">{t.home.extendableTrailer}</option>
                   </select>
                   <svg className="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </label>
@@ -187,117 +205,122 @@ export default async function HomePage() {
                   href="/jobs"
                   className="flex h-10 w-full items-center justify-center rounded-xl bg-amber-400 text-sm font-bold text-slate-950 hover:bg-amber-300 transition-colors"
                 >
-                  Search Jobs
+                  {t.home.searchJobs}
                 </Link>
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center gap-24 py-7 lg:hidden">
+          <div className={`flex items-center gap-24 py-7 lg:hidden ${isArabic ? "justify-end pe-5" : "justify-center"}`}>
   <MobileStat
     icon={<Briefcase />}
     value={`${activeJobsCount || 0}+`}
-    label="Jobs"
+    label={t.home.jobs}
   />
 
   <MobileStat
     icon={<MapPin />}
     value={`${citiesCoveredCount}+`}
-    label="Cities"
+    label={t.home.cities}
   />
 </div>
 
           {/* ── Desktop search form (≥ lg) ── */}
-          <div className="hidden lg:block pt-4">
-            <form action="/jobs" className="w-[600px] rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl">
+          <div className={`hidden pt-4 lg:block ${isArabic ? "text-right" : ""}`}>
+            <form
+              action="/jobs"
+              className={`w-[600px] rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl ${
+                isArabic ? "ml-auto" : ""
+              }`}
+            >
               {/* Row 1: From | To | Cargo Type */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">From</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.from}</label>
                   <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
                     <MapPin className="h-4 w-4 shrink-0 text-amber-400/80" />
                     <input
                       name="origin"
-                      placeholder="City or Region"
+                      placeholder={t.home.cityOrRegion}
                       className="w-full bg-transparent text-sm font-medium text-white placeholder:text-slate-500 outline-none"
                     />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">To</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.to}</label>
                   <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
                     <MapPin className="h-4 w-4 shrink-0 text-amber-400/80" />
                     <input
                       name="destination"
-                      placeholder="City or Region"
+                      placeholder={t.home.cityOrRegion}
                       className="w-full bg-transparent text-sm font-medium text-white placeholder:text-slate-500 outline-none"
                     />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cargo Type</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.cargoType}</label>
                   <select
                     name="cargo_type"
                     defaultValue=""
                     className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3 text-sm font-medium text-white outline-none focus:border-amber-400"
                   >
-                    <option value="">All Types</option>
-                    <option value="heavy_equipment">Heavy Equipment</option>
-                    <option value="industrial_cargo">Industrial Cargo</option>
-                    <option value="oversized_load">Oversized Load</option>
+                    <option value="">{t.home.allTypes}</option>
+                    <option value="heavy_equipment">{t.home.heavyEquipment}</option>
+                    <option value="industrial_cargo">{t.home.industrialCargo}</option>
+                    <option value="oversized_load">{t.home.oversizedLoad}</option>
                   </select>
                 </div>
               </div>
               {/* Row 2: Vehicle | Weight | Search */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vehicle Type</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.vehicleType}</label>
                   <select
                     name="vehicle_type"
                     defaultValue=""
                     className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3 text-sm font-medium text-white outline-none focus:border-amber-400"
                   >
-                    <option value="">All Vehicles</option>
-                    <option value="lowbed_trailer">Lowbed Trailer</option>
-                    <option value="flatbed_trailer">Flatbed Trailer</option>
-                    <option value="extendable_trailer">Extendable Trailer</option>
+                    <option value="">{t.home.allVehicles}</option>
+                    <option value="lowbed_trailer">{t.home.lowbedTrailer}</option>
+                    <option value="flatbed_trailer">{t.home.flatbedTrailer}</option>
+                    <option value="extendable_trailer">{t.home.extendableTrailer}</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Load Weight</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.loadWeight}</label>
                   <select
                     name="weight"
                     defaultValue=""
                     className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3 text-sm font-medium text-white outline-none focus:border-amber-400"
                   >
-                    <option value="">Any Weight</option>
-                    <option value="0-10000">Up to 10,000 kg</option>
-                    <option value="10000-30000">10,000–30,000 kg</option>
-                    <option value="30000+">30,000+ kg</option>
+                    <option value="">{t.home.anyWeight}</option>
+                    <option value="0-10000">{t.home.upToTenTonnes}</option>
+                    <option value="10000-30000">{t.home.tenToThirtyTonnes}</option>
+                    <option value="30000+">{t.home.overThirtyTonnes}</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-transparent select-none">Search</label>
+                  <label className="select-none text-[10px] font-bold uppercase tracking-widest text-transparent">{t.home.searchJobs}</label>
                   <button
                     type="submit"
                     className="flex h-[42px] items-center justify-center gap-2 rounded-xl bg-amber-400 text-sm font-bold text-slate-950 hover:bg-amber-300 transition-colors"
                   >
                   <Search className="h-4 w-4" />
-                      Search Jobs
+                      {t.home.searchJobs}
                   </button>
                 </div>
               </div>
             </form>
-            <div className="mt-6 mb-3 flex w-[600px] items-center justify-start gap-8">
+            <div className={`mt-6 mb-3 flex w-[600px] items-center gap-8 ${isArabic ? "ml-auto justify-end" : "justify-start"}`}>
   <DesktopStat
     icon={<Briefcase className="h-8 w-8" />}
     value={`${activeJobsCount || 0}+`}
-    label="Active Jobs"
+    label={t.home.activeJobs}
   />
 
   <DesktopStat
     icon={<MapPin className="h-8 w-8" />}
     value={`${citiesCoveredCount}+`}
-    label="Cities Covered"
+    label={t.home.citiesCovered}
   />
 </div>
           </div>
@@ -318,12 +341,12 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-10 py-10">
           <div className="flex items-center justify-between gap-6">
             <p className="text-xl font-semibold text-white">
-              Join thousands of shippers and transporters growing their business with{" "}
+              {t.home.join}{" "}
               <span className="text-amber-400">NaqlHub</span>.
             </p>
             <div className="flex shrink-0 gap-3">
               <Link href="/create-listing" className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-300 transition-colors">
-                Post a Job
+                {t.header.postJob}
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
               </Link>
             </div>

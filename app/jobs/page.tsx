@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
 import JobAlertDialog from "@/app/components/JobAlertDialog";
+import { getLocale } from "@/app/lib/locale";
 import {
   Search,
   MapPin,
@@ -37,6 +38,7 @@ export default async function JobsPage({
   const cargoType = pick(sp, "cargo_type").trim();
   const vehicleType = pick(sp, "vehicle_type").trim();
   const weight = pick(sp, "weight").trim();
+  const locale = await getLocale();
 
   let query = supabaseAdmin
     .from("transport_jobs")
@@ -173,6 +175,7 @@ if (weight === "30000+") {
                 vehicle_type: vehicleType,
               }}
               returnTo={currentSearchHref}
+              locale={locale}
             />
           </div>
         )}

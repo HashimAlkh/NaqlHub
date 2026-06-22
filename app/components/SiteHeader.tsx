@@ -1,6 +1,8 @@
 import Link from "next/link";
 import ProfileMenu from "./ProfileMenu";
 import { getCurrentUser } from "@/app/lib/auth";
+import { getTranslations } from "@/app/i18n";
+import { getLocale } from "@/app/lib/locale";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 
 type SiteHeaderProps = {
@@ -27,7 +29,8 @@ function getInitials(fullName: string | null | undefined, email: string) {
 }
 
 export default async function SiteHeader({ sticky }: SiteHeaderProps) {
-  const user = await getCurrentUser();
+  const [user, locale] = await Promise.all([getCurrentUser(), getLocale()]);
+  const t = getTranslations(locale);
   const { data: profile } = user
     ? await supabaseAdmin
         .from("profiles")
@@ -59,14 +62,14 @@ export default async function SiteHeader({ sticky }: SiteHeaderProps) {
             }
             className="font-medium text-slate-600 transition hover:text-slate-900"
           >
-            Job Alerts
+            {t.header.jobAlerts}
           </Link>
 
           <Link
             href="/create-listing"
             className="font-bold text-amber-600 transition hover:text-amber-700"
           >
-            Post Job
+            {t.header.postJob}
           </Link>
         </nav>
 
@@ -78,7 +81,7 @@ export default async function SiteHeader({ sticky }: SiteHeaderProps) {
   href="/login"
   className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
 >
-              Login
+              {t.header.login}
             </Link>
           )}
         </div>
