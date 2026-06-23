@@ -3,6 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/lib/auth";
+import { normalizeSaudiCity } from "@/app/lib/saudiCities";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -61,8 +62,8 @@ function jobPayload(formData: FormData, userId: string) {
     length_m: optionalNumber(formData.get("length_m")),
     width_m: optionalNumber(formData.get("width_m")),
     height_m: optionalNumber(formData.get("height_m")),
-    origin_city: requiredString(formData, "origin_city"),
-    destination_city: requiredString(formData, "destination_city"),
+    origin_city: normalizeSaudiCity(requiredString(formData, "origin_city")),
+    destination_city: normalizeSaudiCity(requiredString(formData, "destination_city")),
     pickup_date: requiredString(formData, "pickup_date"),
     urgency: requiredString(formData, "urgency"),
     description: requiredString(formData, "description"),

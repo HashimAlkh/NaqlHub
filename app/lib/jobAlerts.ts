@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/auth";
+import { normalizeSaudiCity } from "@/app/lib/saudiCities";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 
 export type JobAlert = {
@@ -37,8 +38,9 @@ export async function createJobAlert(formData: FormData) {
   const returnTo = safeReturnPath(String(formData.get("return_to") || "/jobs"));
   const user = await requireAlertUser(returnTo);
   const filters = {
-    origin_city: optionalString(formData, "origin_city"),
-    destination_city: optionalString(formData, "destination_city"),
+    origin_city: normalizeSaudiCity(optionalString(formData, "origin_city") || "") || null,
+    destination_city:
+      normalizeSaudiCity(optionalString(formData, "destination_city") || "") || null,
     cargo_type: optionalString(formData, "cargo_type"),
     vehicle_type: optionalString(formData, "vehicle_type"),
   };

@@ -13,7 +13,11 @@ import { useFormStatus } from "react-dom";
 import { Bell, ChevronDown, MapPin, X } from "lucide-react";
 import { createJobAlert } from "@/app/lib/jobAlerts";
 import { getTranslations, type Locale } from "@/app/i18n";
-import { SAUDI_CITIES } from "@/app/lib/saudiCities";
+import {
+  findSaudiCities,
+  getSaudiCityName,
+  normalizeSaudiCity,
+} from "@/app/lib/saudiCities";
 
 type AlertFilters = {
   origin_city: string;
@@ -118,13 +122,15 @@ export default function JobAlertDialog({
                   name="origin_city"
                   label={t.origin}
                   initialValue={initialFilters.origin_city}
-                  placeholder="Riyadh"
+                  locale={locale}
+                  placeholder={getSaudiCityName("Riyadh", locale)}
                 />
                 <CityAutocomplete
                   name="destination_city"
                   label={t.destination}
                   initialValue={initialFilters.destination_city}
-                  placeholder="Jeddah"
+                  locale={locale}
+                  placeholder={getSaudiCityName("Jeddah", locale)}
                 />
                 <AlertSelect
                   name="cargo_type"
@@ -202,28 +208,25 @@ function AlertSelect({
 function CityAutocomplete({
   initialValue,
   label,
+  locale,
   name,
   placeholder,
 }: {
   initialValue: string;
   label: string;
+  locale: Locale;
   name: string;
   placeholder: string;
 }) {
-  const [value, setValue] = useState(initialValue);
+  const [value, setValue] = useState(() => getSaudiCityName(initialValue, locale));
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const suggestions = useMemo(() => {
-    const query = value.trim().toLocaleLowerCase();
-    if (!query) return [];
+    return findSaudiCities(value, locale);
+  }, [locale, value]);
 
-    return SAUDI_CITIES.filter((city) =>
-      city.toLocaleLowerCase().includes(query)
-    ).slice(0, 5);
-  }, [value]);
-
-  function selectCity(city: string) {
-    setValue(city);
+  function selectCity(city: { en: string; ar: string }) {
+    setValue(city[locale]);
     setActiveIndex(-1);
     setIsOpen(false);
   }
@@ -260,8 +263,8 @@ function CityAutocomplete({
           aria-hidden="true"
           className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400"
         />
+        <input type="hidden" name={name} value={normalizeSaudiCity(value)} />
         <input
-          name={name}
           type="text"
           value={value}
           placeholder={placeholder}
@@ -292,7 +295,7 @@ function CityAutocomplete({
           >
             {suggestions.map((city, index) => (
               <li
-                key={city}
+              key={city.en}
                 id={`${name}-alert-suggestion-${index}`}
                 role="option"
                 aria-selected={index === activeIndex}
@@ -308,7 +311,7 @@ function CityAutocomplete({
                   }`}
                 >
                   <MapPin className="h-4 w-4 shrink-0 text-amber-500" />
-                  {city}
+                  {city[locale]}
                 </button>
               </li>
             ))}

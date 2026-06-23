@@ -9,7 +9,11 @@ import {
   useState,
 } from "react";
 import { ChevronDown, MapPin } from "lucide-react";
-import { SAUDI_CITIES } from "@/app/lib/saudiCities";
+import {
+  findSaudiCities,
+  getSaudiCityName,
+  normalizeSaudiCity,
+} from "@/app/lib/saudiCities";
 import { getTranslations, type Locale } from "@/app/i18n";
 import { createTransportJob, updateTransportJob } from "./actions";
 
@@ -81,27 +85,24 @@ function StyledSelect({
 
 function CityAutocomplete({
   defaultValue,
+  locale,
   name,
   placeholder,
 }: {
   defaultValue: string;
+  locale: Locale;
   name: string;
   placeholder: string;
 }) {
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(() => getSaudiCityName(defaultValue, locale));
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const suggestions = useMemo(() => {
-    const query = value.trim().toLocaleLowerCase();
-    if (!query) return [];
+    return findSaudiCities(value, locale);
+  }, [locale, value]);
 
-    return SAUDI_CITIES.filter((city) =>
-      city.toLocaleLowerCase().includes(query)
-    ).slice(0, 5);
-  }, [value]);
-
-  function selectCity(city: string) {
-    setValue(city);
+  function selectCity(city: { en: string; ar: string }) {
+    setValue(city[locale]);
     setActiveIndex(-1);
     setIsOpen(false);
   }
@@ -141,8 +142,8 @@ function CityAutocomplete({
         aria-hidden="true"
         className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400"
       />
+      <input type="hidden" name={name} value={normalizeSaudiCity(value)} />
       <input
-        name={name}
         type="text"
         value={value}
         placeholder={placeholder}
@@ -174,7 +175,7 @@ function CityAutocomplete({
         >
           {suggestions.map((city, index) => (
             <li
-              key={city}
+              key={city.en}
               id={`${name}-suggestion-${index}`}
               role="option"
               aria-selected={index === activeIndex}
@@ -190,7 +191,7 @@ function CityAutocomplete({
                 }`}
               >
                 <MapPin className="h-4 w-4 shrink-0 text-amber-500" />
-                {city}
+                  {city[locale]}
               </button>
             </li>
           ))}
@@ -673,7 +674,8 @@ function fillTestData() {
             <CityAutocomplete
               name="origin_city"
               defaultValue={initialDraft?.origin_city || ""}
-              placeholder="Riyadh"
+              locale={locale}
+              placeholder={getSaudiCityName("Riyadh", locale)}
             />
           </div>
 
@@ -682,7 +684,8 @@ function fillTestData() {
             <CityAutocomplete
               name="destination_city"
               defaultValue={initialDraft?.destination_city || ""}
-              placeholder="Jeddah"
+              locale={locale}
+              placeholder={getSaudiCityName("Jeddah", locale)}
             />
           </div>
 

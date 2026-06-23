@@ -7,6 +7,8 @@ import { getFavoriteJobIds } from "@/app/lib/favorites";
 import JobAlertDialog from "@/app/components/JobAlertDialog";
 import { getLocale } from "@/app/lib/locale";
 import { getTranslations } from "@/app/i18n";
+import { getSaudiCityName, normalizeSaudiCity } from "@/app/lib/saudiCities";
+import { getRouteArrow } from "@/app/lib/localeFormatters";
 import {
   Search,
   MapPin,
@@ -34,8 +36,8 @@ export default async function JobsPage({
 }) {
   const sp = await searchParams;
 
-  const origin = pick(sp, "origin").trim();
-  const destination = pick(sp, "destination").trim();
+  const origin = normalizeSaudiCity(pick(sp, "origin"));
+  const destination = normalizeSaudiCity(pick(sp, "destination"));
   const cargoType = pick(sp, "cargo_type").trim();
   const vehicleType = pick(sp, "vehicle_type").trim();
   const weight = pick(sp, "weight").trim();
@@ -77,8 +79,10 @@ if (weight === "30000+") {
   const hasRouteFilter = !!(origin || destination);
 
   const subtitle = hasRouteFilter
-    ? `${t.jobs.resultsFor} ${origin || t.alertsPage.anywhere} → ${
-        destination || t.alertsPage.anywhere
+    ? `${t.jobs.resultsFor} ${
+        getSaudiCityName(origin, locale) || t.alertsPage.anywhere
+      } ${getRouteArrow(locale)} ${
+        getSaudiCityName(destination, locale) || t.alertsPage.anywhere
       }`
     : t.jobs.allActive;
 
@@ -150,8 +154,8 @@ if (weight === "30000+") {
               label={t.jobs.route}
               value={
                 hasRouteFilter
-                  ? `${origin || t.alertsPage.anywhere} → ${
-                      destination || t.alertsPage.anywhere
+                  ? `${getSaudiCityName(origin, locale) || t.alertsPage.anywhere} ${getRouteArrow(locale)} ${
+                      getSaudiCityName(destination, locale) || t.alertsPage.anywhere
                     }`
                   : t.jobs.allRoutes
               }

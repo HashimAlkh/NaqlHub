@@ -16,26 +16,11 @@ import FavoriteButton from "@/app/components/FavoriteButton";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getFavoriteJobIds } from "@/app/lib/favorites";
 import { formatWeight } from "@/app/lib/jobFormatters";
+import { formatCargoType, formatVehicleType } from "@/app/lib/jobTypeLabels";
+import { getSaudiCityName } from "@/app/lib/saudiCities";
+import { formatGregorianDate, getRouteArrow } from "@/app/lib/localeFormatters";
 import { getTranslations } from "@/app/i18n";
 import { getLocale } from "@/app/lib/locale";
-
-function formatValue(value: string | null | undefined, fallback: string) {
-  if (!value) return fallback;
-  return value.replaceAll("_", " ");
-}
-
-function formatDate(value: string | null | undefined, locale: string, fallback: string) {
-  if (!value) return fallback;
-
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 function whatsappLink(number: string, title: string) {
   const cleaned = number.replace(/[^\d+]/g, "");
@@ -100,19 +85,19 @@ export default async function JobDetailPage({
                 <div className="mt-4 flex flex-wrap items-center gap-5 text-sm font-semibold text-white/95">
                   <span className="inline-flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    {job.origin_city}
+                    {getSaudiCityName(job.origin_city, locale)}
                   </span>
 
-                  <span className="font-black text-amber-300">→</span>
+                  <span className="font-black text-amber-300">{getRouteArrow(locale)}</span>
 
                   <span className="inline-flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    {job.destination_city}
+                    {getSaudiCityName(job.destination_city, locale)}
                   </span>
 
                   <span className="inline-flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
+                    {formatGregorianDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
                   </span>
                 </div>
               </div>
@@ -127,20 +112,20 @@ export default async function JobDetailPage({
               <div className="mt-4 flex items-center gap-3 text-sm font-bold text-slate-900">
                 <span className="inline-flex min-w-0 items-center gap-2">
                   <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
-                  <span className="truncate">{job.origin_city}</span>
+                  <span className="truncate">{getSaudiCityName(job.origin_city, locale)}</span>
                 </span>
 
-                <span className="shrink-0 font-black text-amber-500">→</span>
+                <span className="shrink-0 font-black text-amber-500">{getRouteArrow(locale)}</span>
 
                 <span className="inline-flex min-w-0 items-center gap-2">
                   <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
-                  <span className="truncate">{job.destination_city}</span>
+                  <span className="truncate">{getSaudiCityName(job.destination_city, locale)}</span>
                 </span>
               </div>
 
               <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
                 <Calendar className="h-4 w-4 text-slate-500" />
-                {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
+                {formatGregorianDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
               </div>
             </div>
 
@@ -154,13 +139,21 @@ export default async function JobDetailPage({
               <FactItem
                 icon={<Truck className="h-5 w-5" />}
                 label={t.detail.vehicle}
-                value={formatValue(job.vehicle_type, t.common.notSpecified)}
+                value={formatVehicleType(
+                  job.vehicle_type,
+                  t.common.notSpecified,
+                  t.types
+                )}
               />
 
               <FactItem
                 icon={<Package className="h-5 w-5" />}
                 label={t.detail.cargo}
-                value={formatValue(job.cargo_type, t.common.notSpecified)}
+                value={formatCargoType(
+                  job.cargo_type,
+                  t.common.notSpecified,
+                  t.types
+                )}
               />
 
               <FactItem

@@ -7,6 +7,8 @@ import { formatWeight } from "@/app/lib/jobFormatters";
 import JobManagementButtons from "./JobManagementButtons";
 import { getTranslations } from "@/app/i18n";
 import { getLocale } from "@/app/lib/locale";
+import { getSaudiCityName } from "@/app/lib/saudiCities";
+import { formatGregorianDate, getRouteArrow } from "@/app/lib/localeFormatters";
 
 export const dynamic = "force-dynamic";
 
@@ -27,19 +29,6 @@ type DashboardJob = {
 function formatValue(value: string | null | undefined, fallback: string) {
   if (!value) return fallback;
   return value.replaceAll("_", " ");
-}
-
-function formatDate(value: string | null | undefined, locale: string, fallback: string) {
-  if (!value) return fallback;
-
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 function statusBadge(status: string | null, labels: { active: string; inactive: string }) {
@@ -139,12 +128,12 @@ export default async function DashboardJobsPage() {
                     <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600">
                       <span className="inline-flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-slate-500" />
-                        {job.origin_city || t.alerts.origin} {locale === "ar" ? "←" : "to"}{" "}
-                        {job.destination_city || t.alerts.destination}
+                        {getSaudiCityName(job.origin_city, locale) || t.alerts.origin} {getRouteArrow(locale)}{" "}
+                        {getSaudiCityName(job.destination_city, locale) || t.alerts.destination}
                       </span>
                       <span className="inline-flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-slate-500" />
-                        {formatDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
+                        {formatGregorianDate(job.pickup_date, locale, t.jobs.pickupDateNotSet)}
                       </span>
                     </div>
                   </div>

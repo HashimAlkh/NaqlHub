@@ -2,8 +2,10 @@ import Link from "next/link";
 import { Bell, Calendar, MapPin, Package, Trash2, Truck } from "lucide-react";
 import SiteHeader from "@/app/components/SiteHeader";
 import JobAlertDialog from "@/app/components/JobAlertDialog";
-import { getTranslations } from "@/app/i18n";
+import { getTranslations, type Locale } from "@/app/i18n";
 import { getLocale } from "@/app/lib/locale";
+import { getSaudiCityName } from "@/app/lib/saudiCities";
+import { formatGregorianDate, getRouteArrow } from "@/app/lib/localeFormatters";
 import {
   deleteJobAlert,
   getUserJobAlerts,
@@ -14,19 +16,6 @@ export const dynamic = "force-dynamic";
 
 function formatValue(value: string | null, fallback: string) {
   return value ? value.replaceAll("_", " ") : fallback;
-}
-
-function formatDate(value: string | null, locale: string, fallback: string) {
-  if (!value) return fallback;
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 export default async function DashboardJobAlertsPage() {
@@ -111,26 +100,28 @@ export default async function DashboardJobAlertsPage() {
   );
 }
 
-function JobAlertCard({ alert, locale }: { alert: JobAlert; locale: string }) {
-  const t = getTranslations(locale === "ar" ? "ar" : "en");
+function JobAlertCard({ alert, locale }: { alert: JobAlert; locale: Locale }) {
+  const t = getTranslations(locale);
+  const origin = getSaudiCityName(alert.origin_city, locale);
+  const destination = getSaudiCityName(alert.destination_city, locale);
   return (
     <article className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <div className="text-lg font-extrabold text-slate-950">
-            {alert.origin_city || t.alertsPage.anywhere} {locale === "ar" ? "←" : "to"} {alert.destination_city || t.alertsPage.anywhere}
+            {origin || t.alertsPage.anywhere} {getRouteArrow(locale)} {destination || t.alertsPage.anywhere}
           </div>
 
           <div className="mt-4 grid gap-3 text-sm font-semibold text-slate-600 sm:grid-cols-2 lg:grid-cols-4">
-            <AlertDetail icon={<MapPin className="h-4 w-4" />} label={t.alerts.origin} value={alert.origin_city || t.alertsPage.any} />
-            <AlertDetail icon={<MapPin className="h-4 w-4" />} label={t.alerts.destination} value={alert.destination_city || t.alertsPage.any} />
+            <AlertDetail icon={<MapPin className="h-4 w-4" />} label={t.alerts.origin} value={origin || t.alertsPage.any} />
+            <AlertDetail icon={<MapPin className="h-4 w-4" />} label={t.alerts.destination} value={destination || t.alertsPage.any} />
             <AlertDetail icon={<Package className="h-4 w-4" />} label={t.alerts.cargo} value={formatValue(alert.cargo_type, t.alertsPage.any)} />
             <AlertDetail icon={<Truck className="h-4 w-4" />} label={t.alerts.vehicle} value={formatValue(alert.vehicle_type, t.alertsPage.any)} />
           </div>
 
           <div className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
             <Calendar className="h-4 w-4" />
-            {t.common.created} {formatDate(alert.created_at, locale, t.common.notSet)}
+            {t.common.created} {formatGregorianDate(alert.created_at, locale, t.common.notSet)}
           </div>
         </div>
 

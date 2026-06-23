@@ -16,6 +16,7 @@ import {
 import JobCard from "./components/JobCard";
 import FeaturedJobsCarousel from "./components/FeaturedJobsCarousel";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import HomeCityAutocomplete from "./components/HomeCityAutocomplete";
 import { getTranslations } from "./i18n";
 import { getLocale } from "./lib/locale";
 
@@ -171,29 +172,26 @@ export default async function HomePage() {
 
           {/* ── Mobile search (< lg) ── */}
           <div className="mt-0 px-4 pb-4 lg:hidden">
-            <div
+            <form
+              action="/jobs"
               dir={isArabic ? "rtl" : undefined}
               className={`rounded-2xl border border-white/10 bg-[#0c1d35] p-3 ${
                 isArabic ? "text-right" : ""
               }`}
             >
               <div className="space-y-2">
-                <label className="flex h-10 items-center gap-3 rounded-xl border border-white/10 bg-[#07152b] px-4 cursor-text">
-                  <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
-                  <input
-                    name="origin"
-                    placeholder={t.home.from}
-                    className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
-                  />
-                </label>
-                <label className="flex h-10 items-center gap-3 rounded-xl border border-white/10 bg-[#07152b] px-4 cursor-text">
-                  <MapPin className="h-4 w-4 shrink-0 text-amber-400/70" />
-                  <input
-                    name="destination"
-                    placeholder={t.home.to}
-                    className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
-                  />
-                </label>
+                <HomeCityAutocomplete
+                  locale={locale}
+                  name="origin"
+                  placeholder={t.home.from}
+                  variant="mobile"
+                />
+                <HomeCityAutocomplete
+                  locale={locale}
+                  name="destination"
+                  placeholder={t.home.to}
+                  variant="mobile"
+                />
                 <label className="flex h-10 items-center gap-3 rounded-xl border border-white/10 bg-[#07152b] px-4">
                   <Package className="h-4 w-4 shrink-0 text-amber-400/70" />
                   <select
@@ -222,14 +220,14 @@ export default async function HomePage() {
                   </select>
                   <svg className="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </label>
-                <Link
-                  href="/jobs"
+                <button
+                  type="submit"
                   className="flex h-10 w-full items-center justify-center rounded-xl bg-amber-400 text-sm font-bold text-slate-950 hover:bg-amber-300 transition-colors"
                 >
                   {t.home.searchJobs}
-                </Link>
+                </button>
               </div>
-            </div>
+            </form>
           </div>
           <div className="flex items-center justify-center gap-24 py-7 lg:hidden">
   <MobileStat
@@ -249,33 +247,29 @@ export default async function HomePage() {
           <div className={`hidden pt-4 lg:block ${isArabic ? "text-right" : ""}`}>
             <form
               action="/jobs"
-              className={`w-[600px] rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl ${
+              className={`w-[600px] overflow-visible rounded-2xl border border-white/10 bg-[#0c1d35] p-5 shadow-2xl ${
                 isArabic ? "ml-auto" : ""
               }`}
             >
               {/* Row 1: From | To | Cargo Type */}
-              <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="grid grid-cols-3 gap-3 overflow-visible mb-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.from}</label>
-                  <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
-                    <MapPin className="h-4 w-4 shrink-0 text-amber-400/80" />
-                    <input
-                      name="origin"
-                      placeholder={t.home.cityOrRegion}
-                      className="w-full bg-transparent text-sm font-medium text-white placeholder:text-slate-500 outline-none"
-                    />
-                  </div>
+                  <HomeCityAutocomplete
+                    locale={locale}
+                    name="origin"
+                    placeholder={t.home.cityOrRegion}
+                    variant="desktop"
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.to}</label>
-                  <div className="flex h-[42px] items-center gap-2 rounded-xl border border-white/10 bg-[#07152b] px-3">
-                    <MapPin className="h-4 w-4 shrink-0 text-amber-400/80" />
-                    <input
-                      name="destination"
-                      placeholder={t.home.cityOrRegion}
-                      className="w-full bg-transparent text-sm font-medium text-white placeholder:text-slate-500 outline-none"
-                    />
-                  </div>
+                  <HomeCityAutocomplete
+                    locale={locale}
+                    name="destination"
+                    placeholder={t.home.cityOrRegion}
+                    variant="desktop"
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t.home.cargoType}</label>
