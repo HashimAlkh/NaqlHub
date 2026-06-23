@@ -189,7 +189,10 @@ export default async function JobDetailPage({
                   <div className="truncate text-sm font-extrabold text-slate-950">
                     {job.contact_name}
                   </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-500">
+                  <div
+                    dir="ltr"
+                    className="mt-1 text-left text-sm font-semibold text-slate-500 [unicode-bidi:plaintext]"
+                  >
                     {job.whatsapp_number}
                   </div>
                 </div>

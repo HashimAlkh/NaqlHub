@@ -57,6 +57,7 @@ export default async function DashboardProfilePage() {
               icon={<Phone className="h-5 w-5" />}
               label={t.profile.phone}
               value={profile?.phone || t.common.notSet}
+              isPhone
             />
             <ProfileField
               icon={<Building2 className="h-5 w-5" />}
@@ -79,10 +80,12 @@ function ProfileField({
   icon,
   label,
   value,
+  isPhone = false,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  isPhone?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
@@ -92,7 +95,12 @@ function ProfileField({
           {label}
         </span>
       </div>
-      <div className="mt-3 break-words text-base font-extrabold text-slate-950">
+      <div
+        dir={isPhone ? "ltr" : undefined}
+        className={`mt-3 break-words text-base font-extrabold text-slate-950 ${
+          isPhone ? "text-left [unicode-bidi:plaintext]" : ""
+        }`}
+      >
         {value}
       </div>
     </div>

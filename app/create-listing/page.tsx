@@ -1,12 +1,13 @@
-import Link from "next/link";
 import SiteHeader from "../components/SiteHeader";
 import ListingFlow from "../components/ListingFlow";
 import { requireUser } from "../lib/auth";
+import { getLocale } from "../lib/locale";
 
 export const dynamic = "force-dynamic";
 
 export default async function CreateListingPage() {
   await requireUser("/login?next=/create-listing");
+  const locale = await getLocale();
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -29,16 +30,7 @@ export default async function CreateListingPage() {
         </div>
 
         <div className="mt-12">
-          <ListingFlow />
-        </div>
-
-        <div className="mt-10 text-center">
-          <Link
-            href="/create-listing/form"
-            className="inline-flex items-center justify-center rounded-2xl bg-amber-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-300"
-          >
-            Create Transport Job
-          </Link>
+          <ListingFlow locale={locale} />
         </div>
       </section>
     </main>

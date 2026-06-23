@@ -74,7 +74,8 @@ export default async function RegisterPage({
                 name="phone"
                 type="tel"
                 autoComplete="tel"
-                className="ms-input mt-1"
+                dir="ltr"
+                className="ms-input mt-1 text-left [unicode-bidi:plaintext]"
                 required
               />
             </div>

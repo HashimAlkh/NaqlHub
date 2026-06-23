@@ -760,7 +760,8 @@ function fillTestData() {
                   : contactDefaults?.whatsapp_number || ""
               }
               placeholder="+966 5x xxx xxxx"
-              className="ms-input mt-1"
+              dir="ltr"
+              className="ms-input mt-1 text-left [unicode-bidi:plaintext]"
               required
             />
           </div>
