@@ -105,7 +105,7 @@ export const en = {
     unableToSignIn: "Unable to sign in right now",
     invalidEmail: "Please enter a valid email address.",
     fullNameRequired: "Please enter your full name.",
-    invalidSaudiPhone: "Please enter a valid Saudi mobile number.",
+    invalidSaudiPhone: "Please enter a valid phone number.",
     passwordsDoNotMatch: "Passwords do not match.",
     invalidResetLink: "This password reset link is invalid or has expired.",
     currentPasswordInvalid: "Your current password is incorrect.",
@@ -300,6 +300,8 @@ export const en = {
     emptyDescription: "Create an alert and get notified when matching transport jobs are posted.",
     anywhere: "Anywhere",
     any: "Any",
+    matchingJob: "matching job",
+    matchingJobs: "matching jobs",
   },
   footer: {
     description: "Saudi Arabia's marketplace for heavy transport, oversized cargo and industrial logistics.",

@@ -358,14 +358,26 @@ export default function CreateListingForm({
       const result = isEditing
         ? await updateTransportJob(formData)
         : await createTransportJob(formData);
+
+      if (!result.ok) {
+        if (result.redirectTo) {
+          window.location.href = result.redirectTo;
+          return;
+        }
+
+        alert(
+          "error" in result && result.error === "invalid_phone"
+            ? translations.auth.invalidSaudiPhone
+            : t.saveError
+        );
+        setSubmitting(false);
+        return;
+      }
+
       window.location.href = result.redirectTo || "/create-listing/success";
     } catch (error) {
       console.error(error);
-      alert(
-        error instanceof Error && error.message === "Invalid Saudi mobile number"
-          ? translations.auth.invalidSaudiPhone
-          : t.saveError
-      );
+      alert(t.saveError);
       setSubmitting(false);
     }
   }

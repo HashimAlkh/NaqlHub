@@ -9,7 +9,7 @@ import {
   getSupabaseAuthClient,
   setAuthCookies,
 } from "./auth";
-import { normalizeSaudiMobile } from "./saudiPhone";
+import { normalizeSaudiPhoneFlexible } from "./saudiPhone";
 import { supabaseAdmin } from "./supabaseAdmin";
 
 type AuthErrorCode =
@@ -128,7 +128,7 @@ export async function registerWithPassword(formData: FormData) {
   const email = cleanString(formData.get("email")).toLowerCase();
   const password = cleanString(formData.get("password"));
   const fullName = cleanString(formData.get("full_name"));
-  const phone = normalizeSaudiMobile(cleanString(formData.get("phone")));
+  const phone = normalizeSaudiPhoneFlexible(cleanString(formData.get("phone")));
   const companyName = cleanString(formData.get("company_name"));
   const next = safeRedirectPath(cleanString(formData.get("next")) || "/dashboard");
 
@@ -229,7 +229,7 @@ export async function updateProfile(formData: FormData) {
   if (!user) redirect("/login?next=/dashboard/profile");
 
   const fullName = cleanString(formData.get("full_name"));
-  const phone = normalizeSaudiMobile(cleanString(formData.get("phone")));
+  const phone = normalizeSaudiPhoneFlexible(cleanString(formData.get("phone")));
   const companyName = cleanString(formData.get("company_name"));
 
   if (!fullName) authErrorRedirect("/dashboard/profile", "full_name_required");

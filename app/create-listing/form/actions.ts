@@ -4,7 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/lib/auth";
 import { normalizeSaudiCity } from "@/app/lib/saudiCities";
-import { normalizeSaudiMobile } from "@/app/lib/saudiPhone";
+import { normalizeSaudiPhoneFlexible } from "@/app/lib/saudiPhone";
+import { findMatchingJobAlerts } from "@/app/lib/jobAlertNotifications";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -70,12 +71,16 @@ function jobPayload(formData: FormData, userId: string) {
     description: requiredString(formData, "description"),
     contact_name: requiredString(formData, "contact_name"),
     whatsapp_number: (() => {
-      const phone = normalizeSaudiMobile(requiredString(formData, "whatsapp_number"));
-      if (!phone) throw new Error("Invalid Saudi mobile number");
+      const phone = normalizeSaudiPhoneFlexible(requiredString(formData, "whatsapp_number"));
+      if (!phone) throw new Error("Invalid phone number");
       return phone;
     })(),
     user_id: userId,
   };
+}
+
+function isInvalidPhoneError(error: unknown) {
+  return error instanceof Error && error.message === "Invalid phone number";
 }
 
 async function uploadJobImages(jobId: string, imageFiles: File[]) {
@@ -144,10 +149,17 @@ export async function createTransportJob(formData: FormData) {
 
   const imageFiles = getImageFiles(formData);
 
-  const payload = {
-    ...jobPayload(formData, user.id),
-    status: "active",
-  };
+  let payload;
+
+  try {
+    payload = {
+      ...jobPayload(formData, user.id),
+      status: "active",
+    };
+  } catch (error) {
+    if (isInvalidPhoneError(error)) return { ok: false, error: "invalid_phone" as const };
+    throw error;
+  }
 
   const { data, error } = await supabase
     .from("transport_jobs")
@@ -170,6 +182,26 @@ export async function createTransportJob(formData: FormData) {
     if (imageUpdateError) {
       throw new Error(imageUpdateError.message);
     }
+  }
+
+  try {
+    const notifications = await findMatchingJobAlerts({ id: data.id, ...payload });
+
+    console.log("Job Alert matching complete", {
+      job: data.id,
+      notifications: notifications.length,
+    });
+
+    notifications.forEach((notification) => {
+      console.log("Matched Job Alert", {
+        user: notification.phone,
+        job: notification.jobId,
+        route: `${notification.origin || "Any"} → ${notification.destination || "Any"}`,
+      });
+    });
+  } catch (notificationError) {
+    // Alert delivery must never block a successfully created transport job.
+    console.error("Job alert matching failed", notificationError);
   }
 
   return {
@@ -203,6 +235,15 @@ export async function updateTransportJob(formData: FormData) {
     throw new Error("Job not found or you do not have permission.");
   }
 
+  let payload;
+
+  try {
+    payload = jobPayload(formData, user.id);
+  } catch (error) {
+    if (isInvalidPhoneError(error)) return { ok: false, error: "invalid_phone" as const };
+    throw error;
+  }
+
   const retainedImageUrls = remainingImageUrls(formData);
   const uploadedImageUrls = await uploadJobImages(jobId, getImageFiles(formData));
   const image_urls = [...retainedImageUrls, ...uploadedImageUrls].slice(
@@ -213,7 +254,7 @@ export async function updateTransportJob(formData: FormData) {
   const { error } = await supabase
     .from("transport_jobs")
     .update({
-      ...jobPayload(formData, user.id),
+      ...payload,
       image_urls,
     })
     .eq("id", jobId)

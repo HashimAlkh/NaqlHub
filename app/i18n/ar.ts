@@ -104,7 +104,7 @@ export const ar = {
     unableToSignIn: "تعذر تسجيل الدخول حالياً",
     invalidEmail: "يرجى إدخال بريد إلكتروني صحيح.",
     fullNameRequired: "يرجى إدخال الاسم الكامل.",
-    invalidSaudiPhone: "يرجى إدخال رقم جوال سعودي صحيح.",
+    invalidSaudiPhone: "يرجى إدخال رقم هاتف صحيح.",
     passwordsDoNotMatch: "كلمتا المرور غير متطابقتين.",
     invalidResetLink: "رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية.",
     currentPasswordInvalid: "كلمة المرور الحالية غير صحيحة.",
@@ -296,6 +296,8 @@ export const ar = {
     emptyDescription: "أنشئ تنبيهًا واحصل على إشعار عند نشر وظائف نقل مطابقة.",
     anywhere: "أي مكان",
     any: "أي",
+    matchingJob: "وظيفة مطابقة",
+    matchingJobs: "وظائف مطابقة",
   },
   footer: {
     description: "سوق المملكة العربية السعودية للنقل الثقيل والحمولات كبيرة الحجم والخدمات اللوجستية الصناعية.",
