@@ -5,6 +5,8 @@ import { loginWithPassword } from "@/app/lib/authActions";
 import { getCurrentUser } from "@/app/lib/auth";
 import { getTranslations } from "@/app/i18n";
 import { getLocale } from "@/app/lib/locale";
+import { getAuthErrorMessage } from "@/app/lib/authMessages";
+import FormSubmitButton from "@/app/components/FormSubmitButton";
 
 function pick(
   searchParams: Record<string, string | string[] | undefined>,
@@ -19,13 +21,14 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const user = await getCurrentUser();
-  if (user) redirect("/dashboard");
-
   const sp = await searchParams;
+  const next = pick(sp, "next") || "/dashboard";
+  const user = await getCurrentUser();
+  if (user) redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
+
   const error = pick(sp, "error");
   const registered = pick(sp, "registered");
-  const next = pick(sp, "next") || "/dashboard";
+  const status = pick(sp, "status");
   const t = getTranslations(await getLocale()).auth;
 
   return (
@@ -48,13 +51,19 @@ export default async function LoginPage({
 
           {registered && (
             <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-              Account created. Please log in to continue.
+              {t.accountCreated}
+            </div>
+          )}
+
+          {status === "password_reset" && (
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              {t.passwordResetSuccess}
             </div>
           )}
 
           {error && (
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-              {error}
+              {getAuthErrorMessage(t, error)}
             </div>
           )}
 
@@ -89,17 +98,23 @@ export default async function LoginPage({
               />
             </div>
 
-            <button
-              type="submit"
-              className="mt-2 rounded-2xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-300"
-            >
-              {t.login}
-            </button>
+            <div>
+              <FormSubmitButton idleLabel={t.login} pendingLabel={t.signingIn} />
+            </div>
           </form>
+
+          <div className="mt-4 text-right text-sm font-semibold">
+            <Link
+              href={`/forgot-password?next=${encodeURIComponent(next)}`}
+              className="text-amber-600 hover:text-amber-700"
+            >
+              {t.forgotPassword}
+            </Link>
+          </div>
 
           <p className="mt-6 text-center text-sm font-semibold text-slate-600">
             {t.newToNaqlHub}{" "}
-            <Link href="/register" className="text-amber-600 hover:text-amber-700">
+            <Link href={`/register?next=${encodeURIComponent(next)}`} className="text-amber-600 hover:text-amber-700">
               {t.createAccount}
             </Link>
           </p>

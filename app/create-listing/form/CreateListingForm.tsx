@@ -16,6 +16,7 @@ import {
 } from "@/app/lib/saudiCities";
 import { getTranslations, type Locale } from "@/app/i18n";
 import { createTransportJob, updateTransportJob } from "./actions";
+import SaudiPhoneInput from "@/app/components/SaudiPhoneInput";
 
 export type TransportJobFormInitialValues = {
   id?: string | null;
@@ -361,8 +362,8 @@ export default function CreateListingForm({
     } catch (error) {
       console.error(error);
       alert(
-        error instanceof Error
-          ? error.message
+        error instanceof Error && error.message === "Invalid Saudi mobile number"
+          ? translations.auth.invalidSaudiPhone
           : t.saveError
       );
       setSubmitting(false);
@@ -751,17 +752,13 @@ function fillTestData() {
 
           <div>
             <label className="ms-label">{t.whatsapp}</label>
-            <input
+            <SaudiPhoneInput
               name="whatsapp_number"
-              type="tel"
               defaultValue={
                 isEditing
                   ? initialDraft?.whatsapp_number || ""
                   : contactDefaults?.whatsapp_number || ""
               }
-              placeholder="+966 5x xxx xxxx"
-              dir="ltr"
-              className="ms-input mt-1 text-left [unicode-bidi:plaintext]"
               required
             />
           </div>

@@ -5,6 +5,9 @@ import { getCurrentUser } from "@/app/lib/auth";
 import { registerWithPassword } from "@/app/lib/authActions";
 import { getTranslations } from "@/app/i18n";
 import { getLocale } from "@/app/lib/locale";
+import { getAuthErrorMessage } from "@/app/lib/authMessages";
+import FormSubmitButton from "@/app/components/FormSubmitButton";
+import SaudiPhoneInput from "@/app/components/SaudiPhoneInput";
 
 function pick(
   searchParams: Record<string, string | string[] | undefined>,
@@ -24,6 +27,7 @@ export default async function RegisterPage({
 
   const sp = await searchParams;
   const error = pick(sp, "error");
+  const next = pick(sp, "next");
   const t = getTranslations(await getLocale()).auth;
 
   return (
@@ -46,11 +50,12 @@ export default async function RegisterPage({
 
           {error && (
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-              {error}
+              {getAuthErrorMessage(t, error)}
             </div>
           )}
 
           <form action={registerWithPassword} className="mt-6 grid gap-4">
+            {next && <input type="hidden" name="next" value={next} />}
             <div>
               <label className="ms-label" htmlFor="full_name">
                 {t.fullName}
@@ -69,15 +74,7 @@ export default async function RegisterPage({
               <label className="ms-label" htmlFor="phone">
                 {t.phone}
               </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                dir="ltr"
-                className="ms-input mt-1 text-left [unicode-bidi:plaintext]"
-                required
-              />
+              <SaudiPhoneInput id="phone" name="phone" required />
             </div>
 
             <div>
@@ -123,17 +120,17 @@ export default async function RegisterPage({
               />
             </div>
 
-            <button
-              type="submit"
-              className="mt-2 rounded-2xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-sm transition hover:bg-amber-300"
-            >
-              {t.createAccountButton}
-            </button>
+            <div>
+              <FormSubmitButton
+                idleLabel={t.createAccountButton}
+                pendingLabel={t.creatingAccount}
+              />
+            </div>
           </form>
 
           <p className="mt-6 text-center text-sm font-semibold text-slate-600">
             {t.alreadyHaveAccount}{" "}
-            <Link href="/login" className="text-amber-600 hover:text-amber-700">
+            <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="text-amber-600 hover:text-amber-700">
               {t.login}
             </Link>
           </p>

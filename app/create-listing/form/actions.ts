@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/lib/auth";
 import { normalizeSaudiCity } from "@/app/lib/saudiCities";
+import { normalizeSaudiMobile } from "@/app/lib/saudiPhone";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -68,7 +69,11 @@ function jobPayload(formData: FormData, userId: string) {
     urgency: requiredString(formData, "urgency"),
     description: requiredString(formData, "description"),
     contact_name: requiredString(formData, "contact_name"),
-    whatsapp_number: requiredString(formData, "whatsapp_number"),
+    whatsapp_number: (() => {
+      const phone = normalizeSaudiMobile(requiredString(formData, "whatsapp_number"));
+      if (!phone) throw new Error("Invalid Saudi mobile number");
+      return phone;
+    })(),
     user_id: userId,
   };
 }

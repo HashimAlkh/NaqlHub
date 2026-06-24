@@ -18,6 +18,7 @@ import { getFavoriteJobIds } from "@/app/lib/favorites";
 import { formatWeight } from "@/app/lib/jobFormatters";
 import { formatCargoType, formatVehicleType } from "@/app/lib/jobTypeLabels";
 import { getSaudiCityName } from "@/app/lib/saudiCities";
+import { formatSaudiMobile } from "@/app/lib/saudiPhone";
 import { formatGregorianDate, getRouteArrow } from "@/app/lib/localeFormatters";
 import { getTranslations } from "@/app/i18n";
 import { getLocale } from "@/app/lib/locale";
@@ -193,7 +194,7 @@ export default async function JobDetailPage({
                     dir="ltr"
                     className="mt-1 text-left text-sm font-semibold text-slate-500 [unicode-bidi:plaintext]"
                   >
-                    {job.whatsapp_number}
+                    {formatSaudiMobile(job.whatsapp_number)}
                   </div>
                 </div>
               </div>
