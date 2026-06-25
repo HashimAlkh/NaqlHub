@@ -1,4 +1,7 @@
-import { normalizeSaudiPhoneFlexible } from "@/app/lib/saudiPhone";
+import {
+  getPhoneCountry,
+  normalizeInternationalPhoneFlexible,
+} from "@/app/lib/saudiPhone";
 import { supabaseAdmin } from "@/app/lib/supabaseAdmin";
 
 type AlertMatchJob = {
@@ -7,6 +10,7 @@ type AlertMatchJob = {
   destination_city: string | null;
   cargo_type: string | null;
   vehicle_type: string | null;
+  budget_sar?: number | null;
   created_at?: string | null;
 };
 
@@ -30,6 +34,7 @@ export type JobAlertNotification = {
   destination: string | null;
   cargoType: string | null;
   vehicleType: string | null;
+  budgetSar: number | null;
   createdAt: string;
 };
 
@@ -101,7 +106,8 @@ export async function findMatchingJobAlerts(job: AlertMatchJob) {
       profile.id,
       {
         originalPhone: profile.phone,
-        normalizedPhone: normalizeSaudiPhoneFlexible(profile.phone || ""),
+        normalizedPhone: normalizeInternationalPhoneFlexible(profile.phone || ""),
+        phoneCountry: getPhoneCountry(profile.phone),
       },
     ])
   );
@@ -132,6 +138,7 @@ export async function findMatchingJobAlerts(job: AlertMatchJob) {
       originalPhone: phone?.originalPhone || null,
       normalizedPhone: phone?.normalizedPhone || null,
       phoneValid: Boolean(phone?.normalizedPhone),
+      phoneCountry: phone?.phoneCountry || null,
     });
 
     return doesJobMatchAlert(alert, job);
@@ -149,6 +156,7 @@ export async function findMatchingJobAlerts(job: AlertMatchJob) {
       destination: job.destination_city,
       cargoType: job.cargo_type,
       vehicleType: job.vehicle_type,
+      budgetSar: job.budget_sar || null,
       createdAt: job.created_at || new Date().toISOString(),
     }];
   });

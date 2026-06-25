@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/app/lib/auth";
 import { normalizeSaudiCity } from "@/app/lib/saudiCities";
 import { normalizeSaudiPhoneFlexible } from "@/app/lib/saudiPhone";
 import { findMatchingJobAlerts } from "@/app/lib/jobAlertNotifications";
+import { sendJobAlertTemplate } from "@/app/lib/whatsapp";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -115,6 +116,32 @@ async function uploadJobImages(jobId: string, imageFiles: File[]) {
   return uploadedImageUrls;
 }
 
+async function notifyMatchingJobAlerts(job: Parameters<typeof findMatchingJobAlerts>[0]) {
+  try {
+    const notifications = await findMatchingJobAlerts(job);
+
+    console.log("Job Alert matching complete", {
+      job: job.id,
+      notifications: notifications.length,
+    });
+
+    await Promise.all(
+      notifications.map(async (notification) => {
+        console.log("Matched Job Alert", {
+          user: notification.phone,
+          job: notification.jobId,
+          route: `${notification.origin || "Any"} → ${notification.destination || "Any"}`,
+        });
+
+        await sendJobAlertTemplate(notification);
+      })
+    );
+  } catch (notificationError) {
+    // Alert notifications must never block a successfully saved transport job.
+    console.error("Job alert notification failed", notificationError);
+  }
+}
+
 function remainingImageUrls(formData: FormData) {
   const raw = String(formData.get("remaining_image_urls") || "[]");
 
@@ -184,25 +211,7 @@ export async function createTransportJob(formData: FormData) {
     }
   }
 
-  try {
-    const notifications = await findMatchingJobAlerts({ id: data.id, ...payload });
-
-    console.log("Job Alert matching complete", {
-      job: data.id,
-      notifications: notifications.length,
-    });
-
-    notifications.forEach((notification) => {
-      console.log("Matched Job Alert", {
-        user: notification.phone,
-        job: notification.jobId,
-        route: `${notification.origin || "Any"} → ${notification.destination || "Any"}`,
-      });
-    });
-  } catch (notificationError) {
-    // Alert delivery must never block a successfully created transport job.
-    console.error("Job alert matching failed", notificationError);
-  }
+  await notifyMatchingJobAlerts({ id: data.id, ...payload });
 
   return {
     ok: true,
@@ -269,6 +278,8 @@ export async function updateTransportJob(formData: FormData) {
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath("/jobs");
   revalidatePath("/");
+
+  await notifyMatchingJobAlerts({ id: jobId, ...payload });
 
   return {
     ok: true,

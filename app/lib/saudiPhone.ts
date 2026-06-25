@@ -11,6 +11,37 @@ function getSaudiPhoneDigits(value: string) {
   return digits;
 }
 
+export function normalizeInternationalPhoneFlexible(value: string) {
+  const cleaned = value.trim().replace(/[\s\-()]/g, "");
+  if (!cleaned) return null;
+
+  let normalized = cleaned;
+
+  if (normalized.startsWith("00")) {
+    normalized = `+${normalized.slice(2)}`;
+  } else if (!normalized.startsWith("+")) {
+    const saudiPhone = normalizeSaudiPhoneFlexible(normalized);
+    return saudiPhone;
+  }
+
+  return /^\+\d{7,15}$/.test(normalized) ? normalized : null;
+}
+
+export function getPhoneCountry(value: string | null | undefined) {
+  const normalized = normalizeInternationalPhoneFlexible(value || "");
+  if (!normalized) return null;
+
+  if (normalized.startsWith("+966")) return "SA";
+  if (normalized.startsWith("+49")) return "DE";
+  if (normalized.startsWith("+971")) return "AE";
+  if (normalized.startsWith("+974")) return "QA";
+  if (normalized.startsWith("+965")) return "KW";
+  if (normalized.startsWith("+973")) return "BH";
+  if (normalized.startsWith("+968")) return "OM";
+
+  return "international";
+}
+
 /**
  * Normalizes Saudi contact numbers used for jobs and profiles during the soft launch.
  * It intentionally accepts business and central numbers; OTP flows should use the
