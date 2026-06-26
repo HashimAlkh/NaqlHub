@@ -32,9 +32,9 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/naqlhub-icon.svg",
-    shortcut: "/naqlhub-icon.svg",
-    apple: "/naqlhub-icon.svg",
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 
   openGraph: {
