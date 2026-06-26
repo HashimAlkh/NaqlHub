@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Session } from "@supabase/supabase-js";
 import {
-  clearRecoveryVerifier,
-  getSupabaseRecoveryClient,
+  getSupabaseAuthCookieNames,
+  getSupabaseRouteClient,
 } from "@/app/lib/auth";
 
 function setSessionCookies(
   response: NextResponse,
-  session: { access_token: string; refresh_token: string; expires_in: number }
+  session: Pick<Session, "access_token" | "refresh_token" | "expires_in">
 ) {
   const options = {
     httpOnly: true,
@@ -31,32 +32,110 @@ function safeNext(value: string | null) {
     : "/reset-password";
 }
 
+function invalidResetLinkResponse(url: URL) {
+  return NextResponse.redirect(new URL("/forgot-password?error=invalid_reset_link", url));
+}
+
+function logAuthCallbackDebug(
+  message: string,
+  details: Record<string, unknown>
+) {
+  console.info(`[auth/callback] ${message}`, details);
+}
+
+function errorDetails(error: { code?: string; message?: string } | null) {
+  return {
+    code: error?.code || null,
+    message: error?.message || null,
+  };
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const tokenHash = url.searchParams.get("token_hash");
   const type = url.searchParams.get("type");
   const next = safeNext(url.searchParams.get("next"));
+  const supabaseAuthCookies = getSupabaseAuthCookieNames(request.cookies.getAll());
+  const hasPkceVerifier = supabaseAuthCookies.some((name) =>
+    name.includes("-code-verifier")
+  );
+
+  const baseDebug = {
+    hasCode: Boolean(code),
+    hasTokenHash: Boolean(tokenHash),
+    type,
+    next,
+    hasPkceVerifier,
+    supabaseAuthCookies,
+  };
+
+  logAuthCallbackDebug("received recovery callback", baseDebug);
+
+  if (code && !hasPkceVerifier) {
+    console.error("Missing PKCE verifier cookie", baseDebug);
+  }
 
   if (!code && !(tokenHash && type === "recovery")) {
-    return NextResponse.redirect(new URL("/forgot-password?error=invalid_reset_link", url));
+    logAuthCallbackDebug("invalid callback parameters", {
+      ...baseDebug,
+      sessionCreated: false,
+    });
+    return invalidResetLinkResponse(url);
   }
 
   try {
-    const supabase = await getSupabaseRecoveryClient();
-    const { data, error } = code
-      ? await supabase.auth.exchangeCodeForSession(code)
-      : await supabase.auth.verifyOtp({ token_hash: tokenHash!, type: "recovery" });
+    const supabaseClient = getSupabaseRouteClient(request);
+    let session: Session | null = null;
 
-    if (error || !data.session) {
-      return NextResponse.redirect(new URL("/forgot-password?error=invalid_reset_link", url));
+    if (code) {
+      const { data, error } = await supabaseClient.supabase.auth.exchangeCodeForSession(code);
+      session = data.session;
+      logAuthCallbackDebug("exchangeCodeForSession result", {
+        ...baseDebug,
+        exchangeCodeForSessionError: errorDetails(error),
+        pendingSupabaseAuthCookies: supabaseClient.getPendingCookieNames(),
+        sessionCreated: Boolean(session),
+      });
     }
 
-    await clearRecoveryVerifier();
+    if (!session && tokenHash && type === "recovery") {
+      const { data, error } = await supabaseClient.supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: "recovery",
+      });
+      session = data.session;
+      logAuthCallbackDebug("verifyOtp result", {
+        ...baseDebug,
+        verifyOtpError: errorDetails(error),
+        pendingSupabaseAuthCookies: supabaseClient.getPendingCookieNames(),
+        sessionCreated: Boolean(session),
+      });
+    }
+
+    if (!session) {
+      logAuthCallbackDebug("no session created", {
+        ...baseDebug,
+        sessionCreated: false,
+      });
+      return invalidResetLinkResponse(url);
+    }
+
     const response = NextResponse.redirect(new URL(next, url));
-    setSessionCookies(response, data.session);
+    supabaseClient.applyCookies(response);
+    setSessionCookies(response, session);
+    logAuthCallbackDebug("redirecting with session cookies", {
+      ...baseDebug,
+      pendingSupabaseAuthCookies: supabaseClient.getPendingCookieNames(),
+      sessionCreated: true,
+    });
     return response;
-  } catch {
-    return NextResponse.redirect(new URL("/forgot-password?error=invalid_reset_link", url));
+  } catch (error) {
+    console.error("[auth/callback] unexpected recovery callback failure", {
+      ...baseDebug,
+      error,
+      sessionCreated: false,
+    });
+    return invalidResetLinkResponse(url);
   }
 }

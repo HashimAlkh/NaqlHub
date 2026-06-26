@@ -3,12 +3,15 @@
 import { redirect } from "next/navigation";
 import {
   clearAuthCookies,
-  getSupabaseRecoveryClient,
+  clearSupabaseAuthCookiesFromStore,
+  getSupabaseAuthCookieNames,
   getAuthenticatedSupabaseClient,
   getCurrentUser,
+  getSupabaseServerActionClient,
   getSupabaseAuthClient,
   setAuthCookies,
 } from "./auth";
+import { cookies } from "next/headers";
 import { normalizeSaudiPhoneFlexible } from "./saudiPhone";
 import { supabaseAdmin } from "./supabaseAdmin";
 
@@ -182,9 +185,17 @@ export async function requestPasswordReset(formData: FormData) {
   if (!email.includes("@")) authErrorRedirect("/forgot-password", "invalid_email");
 
   try {
-    const supabase = await getSupabaseRecoveryClient();
+    const supabase = await getSupabaseServerActionClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${siteUrl()}/auth/callback?next=/reset-password`,
+    });
+    const cookieStore = await cookies();
+    const supabaseAuthCookies = getSupabaseAuthCookieNames(cookieStore.getAll());
+    console.info("Password reset Supabase auth cookies", {
+      names: supabaseAuthCookies,
+      hasPkceCodeVerifier: supabaseAuthCookies.some((name) =>
+        name.includes("-code-verifier")
+      ),
     });
 
     if (error) {
@@ -217,6 +228,7 @@ export async function resetPassword(formData: FormData) {
     const { error } = await sessionClient.supabase.auth.updateUser({ password });
     if (error) authErrorRedirect("/reset-password", mapAuthError(error));
     await clearAuthCookies();
+    await clearSupabaseAuthCookiesFromStore();
     authStatusRedirect("/login", "password_reset");
   } catch (error) {
     if (isNextRedirect(error)) throw error;

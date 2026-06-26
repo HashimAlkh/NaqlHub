@@ -31,6 +31,7 @@ export function getAuthErrorMessage(labels: AuthLabels, code: string) {
 
 export function getPasswordRecoveryErrorMessage(labels: AuthLabels, code: string) {
   if (code === "invalid_email") return labels.invalidEmail;
+  if (code === "invalid_reset_link") return labels.invalidResetLink;
   if (code === "recovery_rate_limited") return labels.resetLinkRateLimited;
   return labels.resetLinkSendFailed;
 }

@@ -142,3 +142,18 @@ body {
 .nh-gold-button:hover {
   background: var(--nh-gold-hover);
 }
+
+@keyframes legal-page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.legal-page-fade {
+  animation: legal-page-fade 420ms ease-out both;
+}

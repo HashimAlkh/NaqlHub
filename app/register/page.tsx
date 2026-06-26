@@ -125,6 +125,17 @@ export default async function RegisterPage({
                 idleLabel={t.createAccountButton}
                 pendingLabel={t.creatingAccount}
               />
+              <p className="mt-3 text-center text-xs leading-5 text-slate-500">
+                By creating an account, you agree to our{" "}
+                <Link href="/terms" className="font-semibold text-amber-600 hover:text-amber-700">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="font-semibold text-amber-600 hover:text-amber-700">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
             </div>
           </form>
 

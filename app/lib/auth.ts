@@ -2,11 +2,19 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { NextRequest, NextResponse } from "next/server";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient, type Session, type User } from "@supabase/supabase-js";
 
 const ACCESS_TOKEN_COOKIE = "naqlhub-access-token";
 const REFRESH_TOKEN_COOKIE = "naqlhub-refresh-token";
-const RECOVERY_VERIFIER_COOKIE = "naqlhub-recovery-verifier";
+const SUPABASE_PKCE_COOKIE_MAX_AGE = 60 * 15;
+
+type CookieToSet = {
+  name: string;
+  value: string;
+  options: CookieOptions;
+};
 
 function createSupabaseAuthClient() {
   const supabaseUrl =
@@ -26,6 +34,19 @@ function createSupabaseAuthClient() {
   });
 }
 
+function getSupabaseConfig() {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl) throw new Error("Supabase URL is not configured");
+  if (!supabaseKey) throw new Error("Supabase public key is not configured");
+
+  return { supabaseUrl, supabaseKey };
+}
+
 function cookieOptions(maxAge?: number) {
   return {
     httpOnly: true,
@@ -34,6 +55,30 @@ function cookieOptions(maxAge?: number) {
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
   };
+}
+
+function supabaseCookieOptions(): CookieOptions {
+  return {
+    httpOnly: true,
+    maxAge: SUPABASE_PKCE_COOKIE_MAX_AGE,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  };
+}
+
+function isSupabaseAuthCookieName(name: string) {
+  return (
+    name.startsWith("sb-") &&
+    (name.includes("-auth-token") || name.includes("-code-verifier"))
+  );
+}
+
+export function getSupabaseAuthCookieNames(cookiesToInspect: { name: string }[]) {
+  return cookiesToInspect
+    .map((cookie) => cookie.name)
+    .filter(isSupabaseAuthCookieName)
+    .sort();
 }
 
 export async function setAuthCookies(session: Session) {
@@ -58,38 +103,82 @@ export async function clearAuthCookies() {
   cookieStore.delete(REFRESH_TOKEN_COOKIE);
 }
 
-export async function getSupabaseRecoveryClient() {
+export async function getSupabaseServerActionClient() {
   const cookieStore = await cookies();
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
 
-  if (!supabaseUrl) throw new Error("Supabase URL is not configured");
-  if (!supabaseKey) throw new Error("Supabase public key is not configured");
-
-  return createClient(supabaseUrl, supabaseKey, {
+  return createServerClient(supabaseUrl, supabaseKey, {
+    cookieOptions: supabaseCookieOptions(),
     auth: {
       autoRefreshToken: false,
-      persistSession: true,
-      flowType: "pkce",
-      storage: {
-        getItem: () => cookieStore.get(RECOVERY_VERIFIER_COOKIE)?.value || null,
-        setItem: (_key, value) => {
-          cookieStore.set(RECOVERY_VERIFIER_COOKIE, value, cookieOptions(60 * 10));
-        },
-        removeItem: () => {
-          cookieStore.delete(RECOVERY_VERIFIER_COOKIE);
-        },
+    },
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          cookieStore.set(name, value, options);
+        });
       },
     },
   });
 }
 
-export async function clearRecoveryVerifier() {
+export function getSupabaseRouteClient(request: NextRequest) {
+  const { supabaseUrl, supabaseKey } = getSupabaseConfig();
+  const pendingCookies: CookieToSet[] = [];
+  const pendingHeaders: Record<string, string> = {};
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookieOptions: supabaseCookieOptions(),
+    auth: {
+      autoRefreshToken: false,
+    },
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet, headers) {
+        pendingCookies.push(...cookiesToSet);
+        Object.assign(pendingHeaders, headers);
+      },
+    },
+  });
+
+  return {
+    supabase,
+    getPendingCookieNames() {
+      return getSupabaseAuthCookieNames(pendingCookies);
+    },
+    applyCookies(response: NextResponse) {
+      pendingCookies.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options);
+      });
+      Object.entries(pendingHeaders).forEach(([name, value]) => {
+        response.headers.set(name, value);
+      });
+    },
+  };
+}
+
+export function clearSupabaseAuthCookies(response: NextResponse, cookieNames: string[]) {
+  cookieNames.forEach((name) => {
+    response.cookies.set(name, "", {
+      ...supabaseCookieOptions(),
+      maxAge: 0,
+    });
+  });
+}
+
+export async function clearSupabaseAuthCookiesFromStore() {
   const cookieStore = await cookies();
-  cookieStore.delete(RECOVERY_VERIFIER_COOKIE);
+  getSupabaseAuthCookieNames(cookieStore.getAll()).forEach((name) => {
+    cookieStore.set(name, "", {
+      ...supabaseCookieOptions(),
+      maxAge: 0,
+    });
+  });
 }
 
 export async function getCurrentUser(): Promise<User | null> {

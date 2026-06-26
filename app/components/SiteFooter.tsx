@@ -49,15 +49,15 @@ export default async function SiteFooter() {
             </h3>
 
             <div className="flex flex-col gap-2 text-sm text-slate-600">
-              <Link href="/impressum" className="hover:text-slate-900">
+              <Link href="/legal" className="hover:text-slate-900">
                 {t.legalNotice}
               </Link>
 
-              <Link href="/datenschutz" className="hover:text-slate-900">
+              <Link href="/privacy" className="hover:text-slate-900">
                 {t.privacy}
               </Link>
 
-              <Link href="/agb" className="hover:text-slate-900">
+              <Link href="/terms" className="hover:text-slate-900">
                 {t.terms}
               </Link>
             </div>
